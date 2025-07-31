@@ -13,9 +13,7 @@ export async function GET() {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    console.log('Current user:', session.user);
     const appointments = await getAppointmentsByPatient();
-    console.log('Fetched appointments:', appointments);
     
     return NextResponse.json(appointments.map(appt => ({
       appointment: appt
@@ -46,8 +44,6 @@ export async function POST(req: Request) {
       contactNo,
     } = body;
 
-    console.log('Creating appointment with session:', session);
-    
     const appointment = await createAppointment({
       userid: session.user.id || 'default',
       programName,
@@ -61,7 +57,6 @@ export async function POST(req: Request) {
       contactNo,
     });
 
-    console.log('Created appointment:', appointment);
     return NextResponse.json(appointment);
   } catch (error) {
     console.error("Error creating appointment:", error);

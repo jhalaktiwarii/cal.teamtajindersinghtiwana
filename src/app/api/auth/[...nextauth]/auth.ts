@@ -68,12 +68,9 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as string;
         session.user.id = token.id as string || token.sub || 'default'; // Ensure ID is never undefined
         session.user.name = token.name as string;
-        
-        // For debugging
-        console.log('Session user:', session.user);
       }
       return session;
     }
   },
-  debug: process.env.NODE_ENV === 'development',
+  debug: false, // Disable debug mode to reduce console output
 }

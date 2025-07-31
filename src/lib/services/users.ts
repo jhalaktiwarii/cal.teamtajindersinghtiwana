@@ -12,7 +12,6 @@ export interface User {
 
 export async function getUserByPhone(phone: string): Promise<User | null> {
   try {
-    console.log("Fetching user from DynamoDB:", phone);
     const result = await dynamoDb.send(
       new GetCommand({
         TableName: "Users",
@@ -23,11 +22,9 @@ export async function getUserByPhone(phone: string): Promise<User | null> {
     );
 
     if (!result.Item) {
-      console.log("No user found with phone:", phone);
       return null;
     }
 
-    console.log("User found:", { ...result.Item, password: "[REDACTED]" });
     return result.Item as User;
   } catch (error) {
     console.error("DynamoDB Error:", error);
@@ -37,25 +34,19 @@ export async function getUserByPhone(phone: string): Promise<User | null> {
 
 export async function verifyUserCredentials(phone: string, password: string) {
   try {
-    console.log("Verifying credentials for phone:", phone);
     const user = await getUserByPhone(phone);
     
     if (!user) {
-      console.log("User not found in verification:", phone);
       return null;
     }
 
-    console.log("Comparing passwords...");
     const { password: hashedPassword, ...userWithoutPassword } = user;
 
     const isValidPassword = await compare(password, hashedPassword);
     
     if (!isValidPassword) {
-      console.log("Invalid password for user:", phone);
       return null;
     }
-
-    console.log("Password verified successfully");
 
     return userWithoutPassword;
   } catch (error) {

@@ -5,30 +5,26 @@ import { authOptions } from "../auth/[...nextauth]/auth";
 
 export async function GET() {
   try {
-    console.log('GET /api/birthdays - Fetching birthdays...');
     const birthdays = await getBirthdays();
-    console.log('GET /api/birthdays - Raw birthdays from DB:', birthdays);
     
     // Validate and clean the data before sending
     const cleanedBirthdays = birthdays.map((birthday: import('@/app/types/birthday').Birthday, index: number) => {
       try {
-        console.log(`Validating birthday ${index}:`, birthday);
-        
         // Ensure all required fields are present and valid
         if (!birthday || !birthday.id || !birthday.fullName) {
-          console.warn(`Invalid birthday at index ${index}:`, birthday);
+          console.warn(`Invalid birthday at index ${index}: missing required fields`);
           return null;
         }
         
         // Ensure day and month are valid numbers
         if (typeof birthday.day !== 'number' || typeof birthday.month !== 'number') {
-          console.warn(`Invalid day/month at index ${index}:`, birthday);
+          console.warn(`Invalid birthday at index ${index}: invalid day/month types`);
           return null;
         }
         
         // Ensure day and month are in valid ranges
         if (birthday.day < 1 || birthday.day > 31 || birthday.month < 1 || birthday.month > 12) {
-          console.warn(`Invalid day/month range at index ${index}:`, birthday);
+          console.warn(`Invalid birthday at index ${index}: day/month out of range`);
           return null;
         }
         
@@ -44,15 +40,13 @@ export async function GET() {
           reminder: birthday.reminder || '09:00' // Default reminder time
         };
         
-        console.log(`Cleaned birthday ${index}:`, cleaned);
         return cleaned;
       } catch (error) {
-        console.error(`Error processing birthday at index ${index}:`, error, birthday);
+        console.error(`Error processing birthday at index ${index}:`, error);
         return null;
       }
     }).filter(Boolean) as import('@/app/types/birthday').Birthday[]; // Remove null entries
     
-    console.log('GET /api/birthdays - Cleaned birthdays:', cleanedBirthdays);
     return NextResponse.json(cleanedBirthdays);
   } catch (error) {
     console.error('GET /api/birthdays - Error:', error);

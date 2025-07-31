@@ -130,7 +130,6 @@ export async function getAppointmentsByPatient(): Promise<Appointment[]> {
 
     // Filter appointments after fetching
     const appointments = result.Items || [];
-    console.log('Fetched appointments:', appointments);
 
     // Return all appointments for now since patientId might be missing
     return appointments as Appointment[];
@@ -170,13 +169,6 @@ export async function updateAppointment(
 
     const updateExpression = 'SET ' + updateParts.join(', ');
 
-    console.log('Updating appointment with:', {
-      id,
-      updateExpression,
-      expressionAttributeValues,
-      expressionAttributeNames
-    });
-
     const result = await dynamoDb.send(new UpdateCommand({
       TableName: 'Appointments',
       Key: { id },
@@ -186,7 +178,6 @@ export async function updateAppointment(
       ReturnValues: "ALL_NEW"
     }));
 
-    console.log('Update result:', result);
     return result.Attributes as Appointment || null;
   } catch (error) {
     console.error('Error updating appointment:', error);

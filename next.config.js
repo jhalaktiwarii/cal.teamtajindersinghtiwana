@@ -16,7 +16,8 @@ const nextConfig = {
   }
 }
 
-export default withPWA({
+// Only enable PWA in production
+const pwaConfig = process.env.NODE_ENV === 'production' ? {
   dest: 'public',
   register: true,
   skipWaiting: true,
@@ -68,4 +69,6 @@ export default withPWA({
       }
     }
   ]
-})(nextConfig)
+} : {};
+
+export default process.env.NODE_ENV === 'production' ? withPWA(pwaConfig)(nextConfig) : nextConfig;
