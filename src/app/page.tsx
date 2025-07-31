@@ -4,13 +4,13 @@ import React from 'react';
 import { useAuth } from './hooks/useAuth';
 import MLAView from './components/mla';
 import PAView from './components/pa';
-import { LoadingSpinner } from './components/ui/loading';
+import { LoadingSpinner, ErrorBoundary } from './components/ui/loading';
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import AddScheduleDialog from '../components/AddScheduleDialog';
 import { useAppointments } from './hooks/useAppointments';
 
-export default function App() {
+function AppContent() {
   const { isMLA, role } = useAuth();
   const [showCreate, setShowCreate] = useState(false);
   const { appointments, saveAppointment, updateAppointment, deleteAppointment } = useAppointments();
@@ -35,5 +35,13 @@ export default function App() {
         <AddScheduleDialog open={showCreate} onClose={() => setShowCreate(false)} onSave={saveAppointment} />
       )}
     </>
+  );
+}
+
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <AppContent />
+    </ErrorBoundary>
   );
 }

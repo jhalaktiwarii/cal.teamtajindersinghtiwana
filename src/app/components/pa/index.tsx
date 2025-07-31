@@ -37,15 +37,70 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
   const [showFullSchedule, setShowFullSchedule] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [birthdays, setBirthdays] = useState<Birthday[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  // Error boundary effect
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      console.error('Global error caught:', event.error);
+      setError(event.error?.message || 'An unexpected error occurred');
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error('Unhandled promise rejection:', event.reason);
+      setError(event.reason?.message || 'An unexpected error occurred');
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, []);
 
   useEffect(() => {
     async function fetchBirthdays() {
       try {
+        console.log('Fetching birthdays...');
         const res = await fetch('/api/birthdays');
-        if (!res.ok) throw new Error('Failed to fetch birthdays');
+        if (!res.ok) {
+          console.error('Failed to fetch birthdays:', res.status, res.statusText);
+          throw new Error(`Failed to fetch birthdays: ${res.status} ${res.statusText}`);
+        }
         const data = await res.json();
-        setBirthdays(data);
-      } catch {
+        console.log('Raw birthday data:', data);
+        
+        // Filter out any invalid birthday records to prevent crashes
+        const validBirthdays = data.filter((birthday: import('@/app/types/birthday').Birthday, index: number) => {
+          try {
+            console.log(`Validating birthday ${index}:`, birthday);
+            
+            // Basic validation
+            const isValid = birthday && 
+                   birthday.id && 
+                   birthday.fullName && 
+                   typeof birthday.day === 'number' && 
+                   typeof birthday.month === 'number' &&
+                   birthday.day >= 1 && birthday.day <= 31 &&
+                   birthday.month >= 1 && birthday.month <= 12;
+            
+            if (!isValid) {
+              console.warn(`Invalid birthday at index ${index}:`, birthday);
+            }
+            
+            return isValid;
+          } catch (error) {
+            console.error(`Error validating birthday at index ${index}:`, error, birthday);
+            return false;
+          }
+        });
+        
+        console.log('Valid birthdays:', validBirthdays);
+        setBirthdays(validBirthdays);
+      } catch (error) {
+        console.error('Error fetching birthdays:', error);
         setBirthdays([]);
       }
     }
@@ -191,57 +246,72 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
 
   // Birthday handlers
   const handleSaveBirthday = async (bday: Birthday) => {
-    let updatedList: Birthday[] = [];
-    if (bday.id) {
-      // Update existing
-      const res = await fetch(`/api/birthdays/${bday.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bday),
-      });
-      if (res.ok) {
-        const updated = await res.json();
-        updatedList = birthdays.map(b => b.id === updated.id ? updated : b);
-        setBirthdays(updatedList);
+    try {
+      let updatedList: Birthday[] = [];
+      if (bday.id) {
+        // Update existing
+        const res = await fetch(`/api/birthdays/${bday.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bday),
+        });
+        if (res.ok) {
+          const updated = await res.json();
+          updatedList = birthdays.map(b => b.id === updated.id ? updated : b);
+          setBirthdays(updatedList);
+        }
+      } else {
+        // Create new
+        const res = await fetch('/api/birthdays', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bday),
+        });
+        if (res.ok) {
+          const created = await res.json();
+          updatedList = [created, ...birthdays];
+          setBirthdays(updatedList);
+        }
       }
-    } else {
-      // Create new
-      const res = await fetch('/api/birthdays', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bday),
-      });
-      if (res.ok) {
-        const created = await res.json();
-        updatedList = [created, ...birthdays];
-        setBirthdays(updatedList);
-      }
+    } catch (error) {
+      console.error('Error saving birthday:', error);
     }
   };
+  
   const handleDeleteBirthday = async (id: string) => {
-    const res = await fetch(`/api/birthdays/${id}`, { method: 'DELETE' });
-    if (res.ok) {
-      setBirthdays(prev => prev.filter(b => b.id !== id));
+    try {
+      const res = await fetch(`/api/birthdays/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setBirthdays(prev => prev.filter(b => b.id !== id));
+      }
+    } catch (error) {
+      console.error('Error deleting birthday:', error);
     }
   };
-  const handleToggleGoing = async (id: string, going: boolean) => {
-    const bday = birthdays.find(b => b.id === id);
-    if (!bday) return;
-    const res = await fetch(`/api/birthdays/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...bday, going }),
-    });
-    if (res.ok) {
-      const updated = await res.json();
-      setBirthdays(prev => prev.map(b => b.id === id ? updated : b));
-    }
-  };
+
 
  
 
   return (
     <div className="flex h-screen overflow-hidden">
+      {error && (
+        <div className="fixed inset-0 z-50 bg-red-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md">
+            <h3 className="text-lg font-semibold text-red-800 mb-2">Error Occurred</h3>
+            <p className="text-red-600 mb-4">{error}</p>
+            <button 
+              onClick={() => {
+                setError(null);
+                window.location.reload();
+              }}
+              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+            >
+              Reload Page
+            </button>
+          </div>
+        </div>
+      )}
+      
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white dark:bg-gray-800 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -259,37 +329,77 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <Sidebar
-          appointments={appointments}
-          onStatusChange={handleStatusChange}
-          onUrgencyChange={handleUrgencyChange}
-          isDarkMode={false}
-          setIsSidebarOpen={setIsSidebarOpen}
-          birthdays={birthdays}
-          onEditBirthday={handleSaveBirthday}
-          onDeleteBirthday={handleDeleteBirthday}
-          onToggleBirthdayGoing={handleToggleGoing}
-        />
+        {(() => {
+          try {
+            return (
+              <Sidebar
+                appointments={appointments}
+                onStatusChange={handleStatusChange}
+                onUrgencyChange={handleUrgencyChange}
+                isDarkMode={false}
+                setIsSidebarOpen={setIsSidebarOpen}
+                birthdays={birthdays}
+                onEditBirthday={handleSaveBirthday}
+                onDeleteBirthday={handleDeleteBirthday}
+              />
+            );
+          } catch (error) {
+            console.error('Error rendering Sidebar:', error);
+            return (
+              <div className="p-4">
+                <h3 className="text-lg font-semibold text-red-800 mb-2">Sidebar Error</h3>
+                <p className="text-red-600 mb-4">Failed to load sidebar</p>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                >
+                  Reload Page
+                </button>
+              </div>
+            );
+          }
+        })()}
       </div>
 
         <main className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'ml-80' : 'ml-0'}`}>
           <div className="h-full p-4">
-            <CalendarView
-              viewMode={viewMode}
-              currentDate={currentDate}
-              events={appointments}
-              onEventClick={(event) => setSelectedEvent(event)}
-              onPrevious={previousPeriod}
-              onNext={nextPeriod}
-              onViewModeChange={mode => setViewMode(mode as ViewMode)}
-              onAddAppointment={(date, time) => handleAddSchedule(time, date)}
-              onDayDoubleClick={(date, ) => handleOpenFullSchedule(date)}
-              onDateChange={date => setSelectedDate(date)}
-              birthdays={birthdays}
-              onSaveBirthday={handleSaveBirthday}
-              onDeleteBirthday={handleDeleteBirthday}
-              onToggleBirthdayGoing={handleToggleGoing}
-            />
+            {(() => {
+              try {
+                return (
+                  <CalendarView
+                    viewMode={viewMode}
+                    currentDate={currentDate}
+                    events={appointments}
+                    onEventClick={(event) => setSelectedEvent(event)}
+                    onPrevious={previousPeriod}
+                    onNext={nextPeriod}
+                    onViewModeChange={mode => setViewMode(mode as ViewMode)}
+                    onAddAppointment={(date, time) => handleAddSchedule(time, date)}
+                    onDayDoubleClick={(date, ) => handleOpenFullSchedule(date)}
+                    onDateChange={date => setSelectedDate(date)}
+                    birthdays={birthdays}
+                    onSaveBirthday={handleSaveBirthday}
+                    onDeleteBirthday={handleDeleteBirthday}
+                  />
+                );
+              } catch (error) {
+                console.error('Error rendering CalendarView:', error);
+                return (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <h3 className="text-lg font-semibold text-red-800 mb-2">Calendar Error</h3>
+                      <p className="text-red-600 mb-4">Failed to load calendar view</p>
+                      <button 
+                        onClick={() => window.location.reload()}
+                        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                      >
+                        Reload Page
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
+            })()}
             {showFullSchedule && selectedDate && (
               <FullPageSchedule
                 date={selectedDate}

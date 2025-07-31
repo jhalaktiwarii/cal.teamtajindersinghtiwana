@@ -35,7 +35,7 @@ interface SidebarProps {
   birthdays: Birthday[];
   onEditBirthday: (bday: Birthday) => void;
   onDeleteBirthday: (id: string) => void;
-  onToggleBirthdayGoing: (id: string, going: boolean) => void;
+
 }
 
 type AppointmentStatus = 'all' | 'going' | 'not-going' | 'scheduled';
@@ -63,7 +63,7 @@ export function Sidebar({
   birthdays,
   onEditBirthday,
   onDeleteBirthday,
-  onToggleBirthdayGoing,
+
 }: SidebarProps) {
   const { data: session } = useSession();
   const [searchQuery, setSearchQuery] = useState('');
@@ -317,7 +317,6 @@ export function Sidebar({
           birthdays={birthdays} 
           onEdit={b => onEditBirthday(b)}
           onDelete={onDeleteBirthday}
-          onToggleGoing={onToggleBirthdayGoing}
         />
       </div>
 

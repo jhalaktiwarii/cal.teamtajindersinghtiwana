@@ -1,10 +1,10 @@
 export interface Birthday {
   id: string;
   fullName: string;
-  designation: string;
-  address: string;
-  phone: string;
-  birthday: string; // ISO date string (recurring annually)
-  going: boolean;
+  address?: string;
+  phone?: string;
+  day: number; // Day of month (1-31)
+  month: number; // Month (1-12)
+  year?: number; // Birth year (optional)
   reminder: string; // ISO time string
 } 

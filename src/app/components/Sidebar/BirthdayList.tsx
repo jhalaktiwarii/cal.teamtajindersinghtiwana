@@ -1,37 +1,46 @@
-import React, { useState } from 'react';
-import { Edit2, Gift, Trash2 } from 'lucide-react';
+"use client"
+
+import React from 'react';
+import { Gift, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { format } from 'date-fns';
 import type { Birthday } from '@/app/types/birthday';
 
 interface BirthdayListProps {
   birthdays: Birthday[];
-  onEdit?: (bday: Birthday) => void;
+  onEdit?: (birthday: Birthday) => void;
   onDelete?: (id: string) => void;
-  onToggleGoing?: (id: string, going: boolean) => void;
 }
 
-export function BirthdayList({ birthdays, onEdit, onDelete, onToggleGoing }: BirthdayListProps) {
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
-  if (!birthdays || birthdays.length === 0) {
-    return (
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Upcoming Birthdays</h3>
-        <div className="p-4 text-center text-sm text-gray-500">
-          No birthdays found
-        </div>
-      </div>
-    );
-  }
-
-  // Sort by next upcoming birthday (ignoring year)
+// Helper function to get next birthday occurrence
+const getNextBirthday = (day: number, month: number): Date => {
   const today = new Date();
+  const currentYear = today.getFullYear();
+  
+  // Create birthday for current year
+  let nextBirthday = new Date(currentYear, month - 1, day);
+  
+  // If birthday has passed this year, set it for next year
+  if (nextBirthday < today) {
+    nextBirthday = new Date(currentYear + 1, month - 1, day);
+  }
+  
+  return nextBirthday;
+};
+
+// Helper function to format birthday date
+const formatBirthdayDate = (day: number, month: number): string => {
+  const months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
+  return `${months[month - 1]} ${day}`;
+};
+
+export function BirthdayList({ birthdays, onEdit, onDelete }: BirthdayListProps) {
+  
   const sorted = [...birthdays].sort((a, b) => {
-    const nextA = new Date(today.getFullYear(), new Date(a.birthday).getMonth(), new Date(a.birthday).getDate());
-    const nextB = new Date(today.getFullYear(), new Date(b.birthday).getMonth(), new Date(b.birthday).getDate());
-    if (nextA < today) nextA.setFullYear(today.getFullYear() + 1);
-    if (nextB < today) nextB.setFullYear(today.getFullYear() + 1);
+    const nextA = getNextBirthday(a.day, a.month);
+    const nextB = getNextBirthday(b.day, b.month);
     return nextA.getTime() - nextB.getTime();
   });
 
@@ -48,22 +57,12 @@ export function BirthdayList({ birthdays, onEdit, onDelete, onToggleGoing }: Bir
               <div className="flex items-center gap-2">
                 <Gift className="h-4 w-4 text-blue-400" />
                 <span className="font-medium text-gray-900 truncate">{bday.fullName}</span>
-                <span className="text-xs text-gray-500 ml-2 truncate">{bday.designation}</span>
               </div>
               <div className="text-xs text-gray-500 mt-0.5">
-                {format(new Date(bday.birthday), 'MMM d')} • {bday.going ? '✅ Going' : '❌ Not Going'}
+                {formatBirthdayDate(bday.day, bday.month)}
               </div>
             </div>
             <div className="flex items-center gap-1 ml-2">
-              <Switch 
-                checked={bday.going} 
-                disabled={updatingId === bday.id}
-                onCheckedChange={async v => {
-                  setUpdatingId(bday.id);
-                  await onToggleGoing?.(bday.id, v);
-                  setUpdatingId(null);
-                }} 
-              />
               <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => onEdit?.(bday)} title="Edit">
                 <Edit2 className="h-4 w-4 text-blue-500" />
               </Button>

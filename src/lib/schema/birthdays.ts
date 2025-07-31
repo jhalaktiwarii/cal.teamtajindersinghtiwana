@@ -48,12 +48,86 @@ export async function ensureBirthdaysTable() {
   }
 }
 
-export async function createBirthday(birthday: Omit<Birthday, 'id'>) {
+// Function to find existing birthday by name and date
+export async function findBirthdayByNameAndDate(fullName: string, day: number, month: number, year?: number): Promise<Birthday | null> {
   await ensureBirthdaysTable();
-  const id = `bday_${Date.now()}`;
-  const newBirthday: Birthday = { id, ...birthday };
-  await dynamoDb.send(new PutCommand({ TableName: 'Birthdays', Item: newBirthday }));
-  return newBirthday;
+  
+  let filterExpression: string;
+  let expressionAttributeNames: Record<string, string>;
+  let expressionAttributeValues: Record<string, string | number>;
+
+  if (year !== undefined) {
+    // If year is provided, check for exact match including year
+    filterExpression = '#name = :name AND #day = :day AND #month = :month AND #year = :year';
+    expressionAttributeNames = {
+      '#name': 'fullName',
+      '#day': 'day',
+      '#month': 'month',
+      '#year': 'year'
+    };
+    expressionAttributeValues = {
+      ':name': fullName,
+      ':day': day,
+      ':month': month,
+      ':year': year
+    };
+  } else {
+    // If no year provided, check for match without year (name, day, month only)
+    filterExpression = '#name = :name AND #day = :day AND #month = :month';
+    expressionAttributeNames = {
+      '#name': 'fullName',
+      '#day': 'day',
+      '#month': 'month'
+    };
+    expressionAttributeValues = {
+      ':name': fullName,
+      ':day': day,
+      ':month': month
+    };
+  }
+
+  const result = await dynamoDb.send(new ScanCommand({ 
+    TableName: 'Birthdays',
+    FilterExpression: filterExpression,
+    ExpressionAttributeNames: expressionAttributeNames,
+    ExpressionAttributeValues: expressionAttributeValues
+  }));
+  
+  return result.Items && result.Items.length > 0 ? result.Items[0] as Birthday : null;
+}
+
+export async function createBirthday(birthday: Omit<Birthday, 'id'>): Promise<{ birthday: Birthday; wasReplaced: boolean }> {
+  await ensureBirthdaysTable();
+  
+  // Check for existing birthday with same name and date
+  const existingBirthday = await findBirthdayByNameAndDate(
+    birthday.fullName, 
+    birthday.day, 
+    birthday.month, 
+    birthday.year
+  );
+  
+  if (existingBirthday) {
+    // Update existing birthday with new data (replace it)
+    const updatedBirthday: Birthday = {
+      ...existingBirthday,
+      ...birthday,
+      id: existingBirthday.id // Keep the same ID
+    };
+    
+    await dynamoDb.send(new PutCommand({ 
+      TableName: 'Birthdays', 
+      Item: updatedBirthday 
+    }));
+    
+    return { birthday: updatedBirthday, wasReplaced: true };
+  } else {
+    // Create new birthday
+    const id = `bday_${Date.now()}`;
+    const newBirthday: Birthday = { id, ...birthday };
+    await dynamoDb.send(new PutCommand({ TableName: 'Birthdays', Item: newBirthday }));
+    return { birthday: newBirthday, wasReplaced: false };
+  }
 }
 
 export async function getBirthdays(): Promise<Birthday[]> {

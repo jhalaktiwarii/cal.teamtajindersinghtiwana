@@ -22,7 +22,6 @@ interface CalendarViewProps {
   birthdays: Birthday[];
   onSaveBirthday: (bday: Birthday) => void;
   onDeleteBirthday: (id: string) => void;
-  onToggleBirthdayGoing: (id: string, going: boolean) => void;
 }
 
 const viewModes: (string)[] = ['day', 'week', 'month', 'year', 'birthday'];
@@ -40,7 +39,7 @@ export function CalendarView({
   birthdays,
   onSaveBirthday,
   onDeleteBirthday,
-  onToggleBirthdayGoing,
+
 }: CalendarViewProps) {
   // Swipe gesture support
   const touchStartX = useRef<number | null>(null);
@@ -99,7 +98,6 @@ export function CalendarView({
             birthdays={birthdays}
             onSave={onSaveBirthday}
             onDelete={onDeleteBirthday}
-            onToggleGoing={onToggleBirthdayGoing}
           />
         ) : viewMode === 'month' ? (
           <MonthView
