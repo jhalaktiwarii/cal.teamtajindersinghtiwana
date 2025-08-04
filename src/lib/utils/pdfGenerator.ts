@@ -1,6 +1,7 @@
 import { CalendarEvent } from '@/app/types';
 import { Document, Packer, Paragraph, Table, TableCell, TableRow, TextRun, WidthType, AlignmentType, BorderStyle, VerticalAlign } from 'docx';
 import saveAs from 'file-saver';
+import { toMarathiDigits, toMarathiTime, getMarathiDay } from '@/app/utils/dateUtils';
 
 export interface PDFGeneratorOptions {
   title?: string;
@@ -9,39 +10,7 @@ export interface PDFGeneratorOptions {
   personName?: string;
 }
 
-function toMarathiDigits(input: string | number) {
-  const marathiDigits = ['०','१','२','३','४','५','६','७','८','९'];
-  return String(input).replace(/\d/g, d => marathiDigits[Number(d)]);
-}
 
-// Convert time to Marathi format
-function toMarathiTime(timeString: string): string {
-  const date = new Date(timeString);
-  const hour = date.getHours();
-  const minute = date.getMinutes();
-  
-  let timePrefix = '';
-  if (hour >= 5 && hour < 12) {
-    timePrefix = 'सकाळी';
-  } else if (hour >= 12 && hour < 17) {
-    timePrefix = 'दुपारी';
-  } else if (hour >= 17 && hour < 20) {
-    timePrefix = 'सायं.';
-  } else {
-    timePrefix = 'रात्री';
-  }
-  
-  const marathiHour = toMarathiDigits(hour);
-  const marathiMinute = toMarathiDigits(minute.toString().padStart(2, '0'));
-  
-  return `${timePrefix} ${marathiHour}.${marathiMinute} वा`;
-}
-
-// Get Marathi day name
-function getMarathiDay(date: Date): string {
-  const days = ['रविवार', 'सोमवार', 'मंगळवार', 'बुधवार', 'गुरुवार', 'शुक्रवार', 'शनिवार'];
-  return days[date.getDay()];
-}
 
 export const generateAppointmentsDocx = async (events: CalendarEvent[], options: PDFGeneratorOptions = {}) => {
   const {

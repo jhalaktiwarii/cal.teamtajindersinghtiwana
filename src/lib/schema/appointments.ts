@@ -83,7 +83,6 @@ export interface Appointment {
   programName: string;
   address: string;
   startTime: string;
-  endTime: string;
   status: 'going' | 'not-going' | 'scheduled';
   notes?: string;
   isUrgent: boolean;

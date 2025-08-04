@@ -8,7 +8,6 @@ interface AppointmentUpdate {
   programName?: string;
   address?: string;
   startTime?: string;
-  endTime?: string;
   status?: 'going' | 'not-going' | 'scheduled';
   notes?: string;
   isUrgent?: boolean;
@@ -44,7 +43,6 @@ export async function PUT(
       programName: requestData.programName,
       address: requestData.address,
       startTime: requestData.startTime,
-      endTime: requestData.endTime,
       status: requestData.status,
       notes: requestData.notes,
       isUrgent: requestData.isUrgent,

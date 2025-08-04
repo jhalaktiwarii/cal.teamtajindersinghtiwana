@@ -15,6 +15,7 @@ import { signOut } from "next-auth/react";
 import { jsPDF } from 'jspdf';
 import { ShareDialog } from '../ShareDialog';
 import { CalendarEvent } from '@/app/types';
+import { toMarathiTime } from '@/app/utils/dateUtils';
 
 export default function MLAView() {
   const { appointments, loading, updateAppointment } = useAppointments();
@@ -79,6 +80,8 @@ export default function MLAView() {
   const handleNext = () => setStartIndex(prev => prev + 1);
   const handlePrev = () => setStartIndex(prev => Math.max(0, prev - 1));
 
+
+
   interface PDFOptions {
     title: string;
     subtitle: string;
@@ -94,7 +97,7 @@ export default function MLAView() {
       doc.text(`Appointment ${index + 1}`, 10, 40 + index * 20);
       doc.text(`Program Name: ${appointment.appointment.programName}`, 10, 50 + index * 20);
       doc.text(`Date: ${format(parseISO(appointment.appointment.startTime), "PPP")}`, 10, 60 + index * 20);
-      doc.text(`Time: ${format(parseISO(appointment.appointment.startTime), "p")} - ${format(parseISO(appointment.appointment.endTime), "p")}`, 10, 70 + index * 20);
+      doc.text(`Time: ${toMarathiTime(appointment.appointment.startTime)}`, 10, 70 + index * 20);
       doc.text(`Contact: ${appointment.appointment.contactNo}`, 10, 80 + index * 20);
       doc.text(`Status: ${appointment.appointment.status}`, 10, 90 + index * 20);
     });
@@ -355,7 +358,7 @@ export default function MLAView() {
                         <h4 className="text-sm font-medium leading-none">Schedule</h4>
                         <div className="text-sm text-muted-foreground">
                           <div>Date: {event.appointment?.startTime ? format(parseISO(event.appointment.startTime), "PPP") : 'Date not set'}</div>
-                          <div>Time: {event.appointment?.startTime ? `${format(parseISO(event.appointment.startTime), "h:mm a")} - ${format(parseISO(event.appointment.endTime), "h:mm a")}` : 'Time not set'}</div>
+                          <div>Time: {event.appointment?.startTime ? `${format(parseISO(event.appointment.startTime), "h:mm a")}` : 'Time not set'}</div>
                         </div>
                       </div>
                       <div className="space-y-2">

@@ -3,7 +3,6 @@ export interface Appointment {
   programName: string
   address: string
   startTime: string
-  endTime: string
   eventFrom: string
   contactNo?: string
   status: 'going' | 'not-going' | 'scheduled'

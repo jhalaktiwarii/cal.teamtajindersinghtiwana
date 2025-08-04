@@ -30,14 +30,9 @@ export function DayView({ events, currentDate, onEventClick, onDayDoubleClick, o
 
   const calculateEventPosition = (event: CalendarEvent) => {
     const startTime = new Date(event.appointment.startTime);
-    const endTime = new Date(event.appointment.endTime);
-    const startHour = startTime.getHours();
     const startMinutes = startTime.getMinutes();
-    const endHour = endTime.getHours();
-    const endMinutes = endTime.getMinutes();
     const top = (startMinutes / 60) * 100;
-    const durationInHours = (endHour - startHour) + (endMinutes - startMinutes) / 60;
-    const height = durationInHours * 100;
+    const height = 60; // Fixed height for events
     return {
       top: `${top}%`,
       height: `${height}%`,
@@ -47,15 +42,12 @@ export function DayView({ events, currentDate, onEventClick, onDayDoubleClick, o
 
   const isEventVisible = (event: CalendarEvent, hour: number) => {
     const startTime = new Date(event.appointment.startTime);
-    const endTime = new Date(event.appointment.endTime);
     const eventStartHour = startTime.getHours();
-    const eventEndHour = endTime.getHours();
     return (
       startTime.getFullYear() === currentDate.getFullYear() &&
       startTime.getMonth() === currentDate.getMonth() &&
       startTime.getDate() === currentDate.getDate() &&
-      hour >= eventStartHour &&
-      hour < eventEndHour
+      hour === eventStartHour
     );
   };
 
@@ -136,8 +128,7 @@ export function DayView({ events, currentDate, onEventClick, onDayDoubleClick, o
                             {event.appointment.eventFrom}
                           </div>
                           <div className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">
-                            {new Date(event.appointment.startTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })} -
-                            {new Date(event.appointment.endTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
+                            {new Date(event.appointment.startTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
                           </div>
                         </div>
                       </div>

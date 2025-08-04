@@ -19,7 +19,6 @@ export default function AddScheduleDialog({ open, onClose, onSave }: AddSchedule
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [startTime, setStartTime] = useState<Date | undefined>(new Date());
-  const [endTime, setEndTime] = useState<Date | undefined>(new Date(Date.now() + 60 * 60 * 1000));
   const [eventFrom, setEventFrom] = useState('');
   const [contactNo, setContactNo] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -28,13 +27,10 @@ export default function AddScheduleDialog({ open, onClose, onSave }: AddSchedule
     setIsSaving(true);
     const start = new Date(date!);
     start.setHours(startTime?.getHours() || 0, startTime?.getMinutes() || 0, 0, 0);
-    const end = new Date(date!);
-    end.setHours(endTime?.getHours() || 0, endTime?.getMinutes() || 0, 0, 0);
     await onSave({
       programName,
       address,
       startTime: start.toISOString(),
-      endTime: end.toISOString(),
       eventFrom,
       contactNo,
       isUrgent: false,
@@ -77,10 +73,7 @@ export default function AddScheduleDialog({ open, onClose, onSave }: AddSchedule
               <label className="block mb-1 font-medium">Start Time</label>
               <TimePicker date={startTime} setDate={setStartTime} />
             </div>
-            <div className="flex-1">
-              <label className="block mb-1 font-medium">End Time</label>
-              <TimePicker date={endTime} setDate={setEndTime} minTime={startTime} />
-            </div>
+
           </div>
           <div>
             <label className="block mb-1 font-medium">Event From</label>

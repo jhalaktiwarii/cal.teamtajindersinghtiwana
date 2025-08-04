@@ -27,7 +27,11 @@ export function WeekView({
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showSchedule, setShowSchedule] = useState(false);
   const hours = Array.from({ length: 24 }, (_, i) => i);
-  const formatHour = (hour: number) => `${hour.toString().padStart(2, '0')}:00`;
+  const formatHour = (hour: number) => {
+    const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    const period = hour < 12 ? 'AM' : 'PM';
+    return `${displayHour}:00 ${period}`;
+  };
 
   const startOfWeek = new Date(currentDate);
   startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
@@ -99,11 +103,9 @@ export function WeekView({
                   })
                   .map((event, i) => {
                     const startTime = new Date(event.appointment.startTime);
-                    const endTime = new Date(event.appointment.endTime);
                     const startHour = startTime.getHours() + startTime.getMinutes() / 60;
-                    const endHour = endTime.getHours() + endTime.getMinutes() / 60;
                     const top = (startHour / 24) * (hours.length * 48);
-                    const height = Math.max((endHour - startHour) * 48, 24); // 48px per hour, min 24px
+                    const height = 48; // Fixed height for events
                     return (
                       <div
                         key={event.appointment.id}
@@ -123,8 +125,6 @@ export function WeekView({
                         </div>
                         <div className="text-[11px] mt-0.5 opacity-90 whitespace-nowrap">
                           {startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
-                          {' - '}
-                          {endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
                         </div>
                       </div>
                     );

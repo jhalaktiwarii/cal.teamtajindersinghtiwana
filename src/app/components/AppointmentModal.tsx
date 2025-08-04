@@ -39,13 +39,9 @@ const formSchema = z.object({
   programName: z.string().min(2, { message: "Program name must be at least 2 characters." }),
   address: z.string().min(4, { message: "Address must be at least 4 characters." }),
   startTime: z.date({ required_error: "Please select a start time" }),
-  endTime: z.date({ required_error: "Please select an end time" }),
   eventFrom: z.string().min(2, { message: "Event organizer must be at least 2 characters." }),
   contactNo: z.string().min(10, { message: "Contact number must be at least 10 digits." }),
   isUrgent: z.boolean().default(false),
-}).refine((data) => data.endTime > data.startTime, {
-  message: "End time must be after start time",
-  path: ["endTime"],
 });
 
 export function AppointmentModal({
@@ -66,33 +62,25 @@ export function AppointmentModal({
   }, [selectedDate, now]);
 
   const initialTimes = useMemo(() => {
-    let startTime: Date, endTime: Date;
+    let startTime: Date;
     const baseDate = selectedDate || now;
 
     if (appointment?.startTime) {
       startTime = new Date(appointment.startTime);
-      endTime = new Date(appointment.endTime);
     } else if (initialTime) {
       const [hours, minutes] = initialTime.split(':').map(Number);
       startTime = new Date(baseDate);
       startTime.setHours(hours);
       startTime.setMinutes(minutes);
-      endTime = new Date(baseDate);
-      endTime.setHours(hours + 1);
-      endTime.setMinutes(minutes);
 
       if (startTime < minTime) {
         startTime = new Date(minTime);
-        endTime = new Date(minTime);
-        endTime.setHours(endTime.getHours() + 1);
       }
     } else {
       startTime = new Date(Math.max(baseDate.getTime(), minTime.getTime()));
-      endTime = new Date(startTime);
-      endTime.setHours(endTime.getHours() + 1);
     }
 
-    return { startTime, endTime };
+    return { startTime };
   }, [appointment, initialTime, selectedDate, minTime, now]);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -104,14 +92,12 @@ export function AppointmentModal({
       contactNo: appointment?.contactNo || "",
       isUrgent: appointment?.isUrgent || false,
       startTime: undefined,
-      endTime: undefined,
     },
   });
 
   useEffect(() => {
-    if (initialTimes?.startTime && initialTimes?.endTime) {
+    if (initialTimes?.startTime) {
       form.setValue('startTime', initialTimes.startTime);
-      form.setValue('endTime', initialTimes.endTime);
     }
   }, [form, initialTimes]);
 
@@ -124,7 +110,6 @@ export function AppointmentModal({
         programName: values.programName,
         address: values.address,
         startTime: values.startTime.toISOString(),
-        endTime: values.endTime.toISOString(),
         eventFrom: values.eventFrom,
         contactNo: values.contactNo,
         status: appointment?.status || 'scheduled',
@@ -179,34 +164,19 @@ export function AppointmentModal({
                 )}
               />
 
-              <div className="grid grid-cols-2 gap-2.5">
-                <FormField
-                  control={form.control}
-                  name="startTime"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Start Time</FormLabel>
-                      <FormControl>
-                        <TimePicker date={field.value} setDate={field.onChange} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="endTime"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>End Time</FormLabel>
-                      <FormControl>
-                        <TimePicker date={field.value} setDate={field.onChange} minTime={form.watch('startTime')} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="startTime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start Time</FormLabel>
+                    <FormControl>
+                      <TimePicker date={field.value} setDate={field.onChange} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}

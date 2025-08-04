@@ -192,7 +192,7 @@ export function AppointmentList({
                       <h4 className="text-sm font-medium leading-none">Schedule</h4>
                       <div className="text-sm text-muted-foreground">
                         <div>Date: {event.appointment?.startTime ? format(parseISO(event.appointment.startTime), "PPP") : 'Date not set'}</div>
-                        <div>Time: {event.appointment?.startTime ? `${format(parseISO(event.appointment.startTime), "h:mm a")} - ${format(parseISO(event.appointment.endTime), "h:mm a")}` : 'Time not set'}</div>
+                        <div>Time: {event.appointment?.startTime ? `${format(parseISO(event.appointment.startTime), "h:mm a")}` : 'Time not set'}</div>
                       </div>
                     </div>
                     <div className="space-y-2">

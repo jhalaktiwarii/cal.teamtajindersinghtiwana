@@ -2,6 +2,7 @@ import React from 'react';
 import { Download, Edit, Trash2, X,  } from 'lucide-react';
 import { CalendarEvent } from '../types';
 import { format } from 'date-fns';
+import { formatTime12Hour } from '@/app/utils/dateUtils';
 
 interface AppointmentDetailsProps {
   event: CalendarEvent;
@@ -16,8 +17,7 @@ export function AppointmentDetails({ event, onEdit, onDelete ,onClose}: Appointm
       id: event.appointment.id,
       date: format(new Date(event.appointment.startTime), "PPP"),
       time: {
-        start: format(new Date(event.appointment.startTime), "p"),
-        end: format(new Date(event.appointment.endTime), "p")
+        start: format(new Date(event.appointment.startTime), "h:mm a")
       },
       status: event.appointment.status,
       isUrgent: event.appointment.isUrgent,
@@ -56,7 +56,7 @@ export function AppointmentDetails({ event, onEdit, onDelete ,onClose}: Appointm
   const formatTime = (dateString?: string) => {
     if (!dateString) return '';
     try {
-      return format(new Date(dateString), "h:mm a");
+      return formatTime12Hour(dateString);
     } catch (error) {
       console.error('Error formatting time:', error);
       return '';
@@ -67,7 +67,7 @@ export function AppointmentDetails({ event, onEdit, onDelete ,onClose}: Appointm
     return null;
   }
 
-  const isPastEvent = new Date(event.appointment.endTime).getTime() < new Date().getTime();
+  const isPastEvent = new Date(event.appointment.startTime).getTime() < new Date().getTime();
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -90,7 +90,7 @@ export function AppointmentDetails({ event, onEdit, onDelete ,onClose}: Appointm
             </span>
             <span className="mx-2">•</span>
             <span>
-              {formatTime(event.appointment.startTime)} - {formatTime(event.appointment.endTime)}
+              {formatTime(event.appointment.startTime)}
             </span>
           </div>
 

@@ -39,7 +39,6 @@ export async function POST(req: Request) {
       address,
       programName,
       startTime,
-      endTime,
       eventFrom,
       contactNo,
     } = body;
@@ -49,7 +48,6 @@ export async function POST(req: Request) {
       programName,
       address,
       startTime: new Date(startTime).toISOString(),
-      endTime: new Date(endTime).toISOString(),
       status: 'scheduled',
       isUrgent: false,
       notes: '', 

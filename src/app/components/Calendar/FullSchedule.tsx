@@ -21,6 +21,7 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { generateAppointmentsDocx } from '@/lib/utils/pdfGenerator';
+import { toMarathiDigits, toMarathiTime, getMarathiDay } from '@/app/utils/dateUtils';
 
 interface FullPageScheduleProps {
   date: Date
@@ -114,7 +115,7 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
       const startTime = new Date(event.appointment.startTime).toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
-        hour12: false
+        hour12: true
       });
       onAddSchedule(startTime, new Date(event.appointment.startTime), event);
     } catch (error) {
@@ -247,37 +248,7 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
 
   const sortedEvents = [...events].sort((a, b) => new Date(a.appointment.startTime).getTime() - new Date(b.appointment.startTime).getTime());
 
-  function toMarathiDigits(input: string | number) {
-    const marathiDigits = ['०','१','२','३','४','५','६','७','८','९'];
-    return String(input).replace(/\d/g, d => marathiDigits[Number(d)]);
-  }
 
-  function getMarathiDay(date: Date): string {
-    const days = ['रविवार', 'सोमवार', 'मंगळवार', 'बुधवार', 'गुरुवार', 'शुक्रवार', 'शनिवार'];
-    return days[date.getDay()];
-  }
-
-  function toMarathiTime(timeString: string): string {
-    const date = new Date(timeString);
-    const hour = date.getHours();
-    const minute = date.getMinutes();
-    
-    let timePrefix = '';
-    if (hour >= 5 && hour < 12) {
-      timePrefix = 'सकाळी';
-    } else if (hour >= 12 && hour < 17) {
-      timePrefix = 'दुपारी';
-    } else if (hour >= 17 && hour < 20) {
-      timePrefix = 'सायं.';
-    } else {
-      timePrefix = 'रात्री';
-    }
-    
-    const marathiHour = toMarathiDigits(hour);
-    const marathiMinute = toMarathiDigits(minute.toString().padStart(2, '0'));
-    
-    return `${timePrefix} ${marathiHour}.${marathiMinute} वा`;
-  }
 
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-hidden flex flex-col w-full max-w-full">
@@ -473,7 +444,7 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
                             <div className="flex items-center gap-2 text-sm">
                               <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                               <span>
-                                {new Date(event.appointment.startTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })} - {new Date(event.appointment.endTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                {new Date(event.appointment.startTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
                               </span>
                             </div>
                             <div className="text-sm">

@@ -168,7 +168,7 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
     }
     
     setIsAppointmentModalOpen(true);
-    setSelectedTime(time || format(scheduleDate, 'HH:mm'));
+            setSelectedTime(time || format(scheduleDate, 'hh:mm a'));
     setSelectedAppointmentDate(scheduleDate);
     if (eventToEdit) {
       setSelectedEvent(eventToEdit);
@@ -198,7 +198,6 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
             !appointmentData.programName || 
             !appointmentData.address || 
             !appointmentData.startTime || 
-            !appointmentData.endTime || 
             !appointmentData.status || 
             !appointmentData.eventFrom || 
             !appointmentData.contactNo ||
@@ -211,7 +210,6 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
           programName: appointmentData.programName,
           address: appointmentData.address,
           startTime: appointmentData.startTime,
-          endTime: appointmentData.endTime,
           status: appointmentData.status,
           eventFrom: appointmentData.eventFrom,
           contactNo: appointmentData.contactNo,
@@ -231,7 +229,7 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
 
   const handleEditAppointment = () => {
     if (selectedEvent) {
-      setSelectedTime(new Date(selectedEvent.appointment.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      setSelectedTime(new Date(selectedEvent.appointment.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }));
       setIsAppointmentModalOpen(true);
       setIsEditing(true);
     }

@@ -12,7 +12,6 @@ interface EventDetailsProps {
 
 export function EventDetails({ event, onEdit, onDelete }: EventDetailsProps) {
   const startTime = new Date(event.appointment.startTime);
-  const endTime = new Date(event.appointment.endTime);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
@@ -27,7 +26,7 @@ export function EventDetails({ event, onEdit, onDelete }: EventDetailsProps) {
           <div className="flex items-center text-gray-600">
             <Clock className="h-5 w-5 mr-2" />
             <span>
-              {startTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })} - {endTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
+              {startTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
             </span>
           </div>
 
