@@ -360,7 +360,7 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
       </div>
 
         <main className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'ml-80' : 'ml-0'}`}>
-          <div className="h-full p-4">
+          <div className="h-full p-1 xs:p-2 sm:p-3 md:p-4 overflow-x-auto overflow-y-auto">
             {(() => {
               try {
                 return (
@@ -374,10 +374,14 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
                     onViewModeChange={mode => setViewMode(mode as ViewMode)}
                     onAddAppointment={(date, time) => handleAddSchedule(time, date)}
                     onDayDoubleClick={(date, ) => handleOpenFullSchedule(date)}
-                    onDateChange={date => setSelectedDate(date)}
+                    onDateChange={date => {
+                      setSelectedDate(date);
+                      handleOpenFullSchedule(date);
+                    }}
                     birthdays={birthdays}
                     onSaveBirthday={handleSaveBirthday}
                     onDeleteBirthday={handleDeleteBirthday}
+                    isSidebarOpen={isSidebarOpen}
                   />
                 );
               } catch (error) {

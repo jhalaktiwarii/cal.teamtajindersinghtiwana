@@ -28,12 +28,6 @@ const getNextBirthday = (day: number, month: number): Date => {
   return nextBirthday;
 };
 
-// Helper function to check if birthday is today
-const isBirthdayToday = (day: number, month: number): boolean => {
-  const today = new Date();
-  return today.getDate() === day && today.getMonth() === month - 1;
-};
-
 export function BirthdayView({ birthdays, onSave, onDelete }: BirthdayViewProps) {
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -45,7 +39,8 @@ export function BirthdayView({ birthdays, onSave, onDelete }: BirthdayViewProps)
     const s = search.toLowerCase();
     return birthdays.filter(b =>
       b.fullName.toLowerCase().includes(s) ||
-      (b.phone && b.phone.includes(s))
+      (b.phone && b.phone.includes(s)) ||
+      (b.ward && b.ward.toLowerCase().includes(s))
     );
   }, [birthdays, search]);
 
@@ -58,69 +53,58 @@ export function BirthdayView({ birthdays, onSave, onDelete }: BirthdayViewProps)
     });
   }, [filtered]);
 
-  const todaysBirthdays = useMemo(() => {
-    return sorted.filter(b => isBirthdayToday(b.day, b.month));
-  }, [sorted]);
-
   const handleImportComplete = () => {
     // Refresh the birthdays list
     window.location.reload();
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4 w-full">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold flex items-center gap-2">
-          <Gift className="h-6 w-6 text-blue-400" /> Birthdays
+    <div className="max-w-2xl mx-auto p-1 xs:p-2 sm:p-3 md:p-4 w-full overflow-x-auto min-w-0">
+      <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <h2 className="text-lg xs:text-xl sm:text-2xl font-bold flex items-center gap-2">
+          <Gift className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6 text-blue-400" /> 
+          <span className="whitespace-nowrap">Birthdays</span>
         </h2>
-        <div className="flex gap-2">
+        <div className="flex flex-col xs:flex-row gap-2 w-full">
           <Button 
             onClick={() => setImportModalOpen(true)} 
             variant="outline"
-            className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+            className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100 text-xs xs:text-sm sm:text-base w-full xs:w-auto"
           >
-            <Upload className="h-4 w-4 mr-2" />
-            Import Excel
+            <Upload className="h-3 w-3 xs:h-4 xs:w-4 mr-1 xs:mr-2" />
+            <span className="whitespace-nowrap">Import Excel</span>
           </Button>
           <Button 
             onClick={() => { setEditBirthday(undefined); setModalOpen(true); }} 
-            className="bg-blue-500 text-white rounded-md px-4 py-2 font-medium shadow hover:bg-blue-600"
+            className="bg-blue-500 text-white rounded-md px-2 xs:px-3 sm:px-4 py-2 font-medium shadow hover:bg-blue-600 text-xs xs:text-sm sm:text-base w-full xs:w-auto"
           >
-            Add Birthday
+            <span className="whitespace-nowrap">Add Birthday</span>
           </Button>
         </div>
       </div>
-      <div className="mb-4 flex gap-2 items-center">
+      <div className="mb-4 flex flex-col xs:flex-row gap-2 items-start xs:items-center">
         <input
           type="text"
           placeholder="Search by name..."
-          className="border rounded px-3 py-2 w-full max-w-xs"
+          className="border rounded px-2 xs:px-3 py-2 w-full text-xs xs:text-sm sm:text-base"
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
         <Button
           variant="outline"
-          className="ml-2"
+          className="w-full xs:w-auto text-xs xs:text-sm sm:text-base whitespace-nowrap"
           onClick={() => setSearch('')}
         >
           Clear
         </Button>
       </div>
-      <div className="mb-4">
-        <Button
-          className="bg-green-500 text-white rounded-md px-4 py-2 font-medium shadow hover:bg-green-600"
-          onClick={() => alert('Wishes sent to all!')}
-          disabled={todaysBirthdays.length === 0}
-        >
-          Send All Wishes ({todaysBirthdays.length})
-        </Button>
-      </div>
-      <h3 className="text-lg font-semibold mb-2">All Birthdays</h3>
+      <h3 className="text-base xs:text-lg font-semibold mb-2">All Birthdays</h3>
       <BirthdayList 
         birthdays={sorted} 
         onEdit={b => { setEditBirthday(b); setModalOpen(true); }}
         onDelete={onDelete}
       />
+      <div className="h-20 sm:h-16"></div> {/* Spacer for floating action button */}
       <BirthdayModal
         open={modalOpen}
         onClose={() => { setModalOpen(false); setEditBirthday(undefined); }}

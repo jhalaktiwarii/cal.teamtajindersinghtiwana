@@ -123,7 +123,7 @@ export async function createBirthday(birthday: Omit<Birthday, 'id'>): Promise<{ 
     return { birthday: updatedBirthday, wasReplaced: true };
   } else {
     // Create new birthday
-    const id = `bday_${Date.now()}`;
+    const id = `bday_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const newBirthday: Birthday = { id, ...birthday };
     await dynamoDb.send(new PutCommand({ TableName: 'Birthdays', Item: newBirthday }));
     return { birthday: newBirthday, wasReplaced: false };

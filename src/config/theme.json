@@ -1,0 +1,164 @@
+{
+    "app": {
+      "name": "My Calendar App",
+      "platform": "web",
+      "theme": {
+        "colors": {
+          "primary": "#FF9933",
+          "secondary": "#FFFFFF",
+          "accent": "#138808",
+          "background": "#FFFFFF",
+          "surface": "#F5F5F5",
+          "textPrimary": "#000000",
+          "textSecondary": "#555555",
+          "border": "#E0E0E0",
+          "urgent": "#FF4C4C",
+          "highlight": "#FFDD99"
+        },
+        "font": {
+          "family": "Inter, sans-serif",
+          "sizes": {
+            "title": "24px",
+            "heading": "20px",
+            "subheading": "18px",
+            "body": "16px",
+            "small": "14px"
+          }
+        },
+        "spacing": {
+          "xs": "4px",
+          "sm": "8px",
+          "md": "16px",
+          "lg": "24px"
+        },
+        "radii": {
+          "button": "12px",
+          "card": "20px",
+          "modal": "24px"
+        },
+        "shadows": {
+          "default": "0 4px 16px rgba(0, 0, 0, 0.08)"
+        }
+      }
+    },
+    "components": {
+      "layout": {
+        "header": {
+          "background": "linear-gradient(to right, #FF9933, #FFFFFF, #138808)",
+          "textColor": "#000000",
+          "height": "64px",
+          "padding": "0 24px"
+        },
+        "sidebar": {
+          "background": "#F5F5F5",
+          "width": "260px",
+          "textColor": "#000000"
+        },
+        "mainArea": {
+          "background": "#FFFFFF",
+          "padding": "24px"
+        },
+        "floatingButtons": {
+          "style": {
+            "borderRadius": "50%",
+            "color": "#FFFFFF",
+            "background": "#138808",
+            "iconSize": "20px"
+          }
+        }
+      },
+      "calendar": {
+        "views": ["month", "week", "day", "year"],
+        "selection": {
+          "activeColor": "#138808",
+          "hoverColor": "#FF9933"
+        },
+        "toggles": {
+          "default": "#FFFFFF",
+          "active": "#FF9933"
+        },
+        "grid": {
+          "borderColor": "#E0E0E0",
+          "background": "#FFFFFF",
+          "highlightToday": "#FFDD99"
+        }
+      },
+      "appointments": {
+        "card": {
+          "background": "#F5F5F5",
+          "borderRadius": "20px",
+          "boxShadow": "default",
+          "textColor": "#000000",
+          "urgentBorder": "#FF4C4C",
+          "padding": "16px"
+        },
+        "status": {
+          "going": "#138808",
+          "notGoing": "#FF4C4C",
+          "scheduled": "#FF9933"
+        }
+      },
+      "birthdays": {
+        "card": {
+          "background": "#FFFFFF",
+          "borderColor": "#FF9933",
+          "highlight": "#FFDD99",
+          "iconColor": "#138808"
+        },
+        "actions": {
+          "callButton": {
+            "background": "#138808",
+            "icon": "phone",
+            "color": "#FFFFFF"
+          }
+        }
+      },
+      "forms": {
+        "inputs": {
+          "background": "#FFFFFF",
+          "border": "#E0E0E0",
+          "textColor": "#000000",
+          "focusRing": "#138808"
+        },
+        "buttons": {
+          "primary": {
+            "background": "#138808",
+            "textColor": "#FFFFFF",
+            "hover": "#0f6607"
+          },
+          "secondary": {
+            "background": "#FF9933",
+            "textColor": "#FFFFFF",
+            "hover": "#e9821f"
+          }
+        },
+        "modals": {
+          "background": "#FFFFFF",
+          "borderRadius": "24px",
+          "padding": "24px",
+          "headerFont": "20px"
+        }
+      }
+    },
+    "roles": {
+      "MLA": {
+        "canExport": true,
+        "canUpdateStatus": true,
+        "viewOnlyBirthdays": false,
+        "uiVisibility": {
+          "createButton": false,
+          "editButton": false
+        }
+      },
+      "PA": {
+        "canCreateAppointments": true,
+        "canEditBirthdays": true,
+        "canImportExport": true,
+        "uiVisibility": {
+          "createButton": true,
+          "editButton": true
+        }
+      }
+    }
+  }
+  

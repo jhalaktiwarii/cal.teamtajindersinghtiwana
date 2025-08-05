@@ -6,7 +6,7 @@ interface YearViewProps {
   currentDate: Date;
   onEventClick: (event: CalendarEvent) => void;
   onDayDoubleClick: (date: Date) => void;
-  onViewModeChange?: (mode: 'day' | 'week' | 'month' | 'year') => void;
+  onViewModeChange?: (mode: 'day' | 'week' | 'month' | 'year' | 'birthday') => void;
   onDateChange?: (date: Date) => void;
 }
 

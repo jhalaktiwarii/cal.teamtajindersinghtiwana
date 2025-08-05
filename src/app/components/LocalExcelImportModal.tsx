@@ -28,6 +28,7 @@ interface PreviewResult {
     fullName: string;
     address?: string;
     phone?: string;
+    ward?: string;
     day: number;
     month: number;
     year?: number;
@@ -162,6 +163,7 @@ export default function LocalExcelImportModal({ open, onClose, onImportComplete 
           const nameIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('full name'));
           const addressIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('address'));
           const phoneIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('phone'));
+          const wardIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('ward'));
           const dayIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('day'));
           const monthIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('month'));
           const yearIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('year'));
@@ -176,6 +178,7 @@ export default function LocalExcelImportModal({ open, onClose, onImportComplete 
               const fullName = row[nameIndex]?.toString()?.trim() || '';
               const address = row[addressIndex]?.toString()?.trim() || '';
               const phone = row[phoneIndex]?.toString()?.trim() || '';
+              const ward = row[wardIndex]?.toString()?.trim() || '';
               const dayStr = row[dayIndex]?.toString()?.trim() || '';
               const monthStr = row[monthIndex]?.toString()?.trim() || '';
               const yearStr = row[yearIndex]?.toString()?.trim() || '';
@@ -258,6 +261,7 @@ export default function LocalExcelImportModal({ open, onClose, onImportComplete 
                 fullName,
                 address: address || undefined,
                 phone: phone || undefined,
+                ward: ward || undefined,
                 day,
                 month,
                 year,
@@ -337,6 +341,7 @@ export default function LocalExcelImportModal({ open, onClose, onImportComplete 
           const nameIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('full name'));
           const addressIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('address'));
           const phoneIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('phone'));
+          const wardIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('ward'));
           const dayIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('day'));
           const monthIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('month'));
           const yearIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('year'));
@@ -351,6 +356,7 @@ export default function LocalExcelImportModal({ open, onClose, onImportComplete 
               const fullName = row[nameIndex]?.toString()?.trim() || '';
               const address = row[addressIndex]?.toString()?.trim() || '';
               const phone = row[phoneIndex]?.toString()?.trim() || '';
+              const ward = row[wardIndex]?.toString()?.trim() || '';
               const dayStr = row[dayIndex]?.toString()?.trim() || '';
               const monthStr = row[monthIndex]?.toString()?.trim() || '';
               const yearStr = row[yearIndex]?.toString()?.trim() || '';
@@ -434,6 +440,7 @@ export default function LocalExcelImportModal({ open, onClose, onImportComplete 
                 fullName,
                 address: address || undefined,
                 phone: phone || undefined,
+                ward: ward || undefined,
                 day,
                 month,
                 year,
@@ -491,10 +498,10 @@ export default function LocalExcelImportModal({ open, onClose, onImportComplete 
 
   const downloadTemplate = () => {
     const templateData = [
-      ['Full Name', 'Address', 'Phone', 'Day', 'Month'],
-      ['John Doe', '123 Main Street City State 12345', '+1234567890', '15', '05'],
-      ['Jane Smith', '', '', '20', '12'],
-      ['Mike Johnson', '789 Pine Road Village State 11111', '', '10', '08'],
+      ['Full Name', 'Address', 'Phone', 'Ward', 'Day', 'Month'],
+      ['John Doe', '123 Main Street City State 12345', '+1234567890', 'Ward A', '15', '05'],
+      ['Jane Smith', '', '', 'Ward B', '20', '12'],
+      ['Mike Johnson', '789 Pine Road Village State 11111', '', 'Ward A', '10', '08'],
     ];
 
     const csvContent = templateData.map(row => row.join(',')).join('\n');
@@ -571,9 +578,9 @@ export default function LocalExcelImportModal({ open, onClose, onImportComplete 
               <div className="bg-blue-50 p-4 rounded-lg">
                 <h4 className="font-medium text-blue-900 mb-2">File Format Requirements:</h4>
                 <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• First row should contain headers: Full Name, Address, Phone, Day, Month</li>
+                  <li>• First row should contain headers: Full Name, Address, Phone, Ward, Day, Month</li>
                   <li>• <strong>Required:</strong> Full Name, Day, Month</li>
-                  <li>• <strong>Optional:</strong> Address, Phone (minimum 10 digits if provided), Year</li>
+                  <li>• <strong>Optional:</strong> Address, Phone (minimum 10 digits if provided), Ward, Year</li>
                   <li>• Day: 1-31, Month: 1-12, Year: 1900-{new Date().getFullYear()} (optional)</li>
                   <li>• <strong>Local Storage:</strong> Data will be stored in your browser</li>
                   <li>• Duplicate birthdays will be updated if they exist in the import file.</li>
@@ -646,6 +653,9 @@ export default function LocalExcelImportModal({ open, onClose, onImportComplete 
                                 )}
                                 {birthday.phone && (
                                   <div className="text-sm text-gray-500">{birthday.phone}</div>
+                                )}
+                                {birthday.ward && (
+                                  <div className="text-sm text-gray-500">Ward: {birthday.ward}</div>
                                 )}
                               </div>
                               <CheckCircle className="h-5 w-5 text-green-500 mt-1" />

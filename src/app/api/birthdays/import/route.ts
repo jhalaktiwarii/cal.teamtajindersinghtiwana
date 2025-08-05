@@ -50,6 +50,7 @@ function validateBirthdayRow(row: string[], headers: string[], rowNumber: number
   const nameIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('full name'));
   const addressIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('address'));
   const phoneIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('phone'));
+  const wardIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('ward'));
   const dayIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('day'));
   const monthIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('month'));
   const yearIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('year'));
@@ -58,6 +59,7 @@ function validateBirthdayRow(row: string[], headers: string[], rowNumber: number
   const fullName = row[nameIndex]?.toString()?.trim() || '';
   const address = row[addressIndex]?.toString()?.trim() || '';
   const phone = row[phoneIndex]?.toString()?.trim() || '';
+  const ward = row[wardIndex]?.toString()?.trim() || '';
   const dayStr = row[dayIndex]?.toString()?.trim() || '';
   const monthStr = row[monthIndex]?.toString()?.trim() || '';
   const yearStr = row[yearIndex]?.toString()?.trim() || '';
@@ -152,6 +154,7 @@ function validateBirthdayRow(row: string[], headers: string[], rowNumber: number
     year,
     address: address || undefined,
     phone: phone || undefined,
+    ward: ward || undefined,
     reminder: '09:00' // Default reminder time
   };
 
@@ -211,7 +214,7 @@ export async function POST(request: NextRequest) {
     if (missingHeaders.length > 0) {
       return new NextResponse(
         JSON.stringify({ 
-          error: `Missing required headers: ${missingHeaders.join(', ')}. Required headers: ${requiredHeaders.join(', ')}. Optional headers: Address, Phone, Year.` 
+          error: `Missing required headers: ${missingHeaders.join(', ')}. Required headers: ${requiredHeaders.join(', ')}. Optional headers: Address, Phone, Ward, Year.` 
         }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );

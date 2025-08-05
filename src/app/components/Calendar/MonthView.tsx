@@ -1,10 +1,9 @@
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import { CalendarEvent } from '../../types';
 
 interface MonthViewProps {
   events: CalendarEvent[];
   currentDate: Date;
-  onEventClick: (event: CalendarEvent) => void;
   onDayDoubleClick: (date: Date, time?: string) => void;
   onDayClick?: (date: Date) => void;
   onAddAppointment?: (date: Date, time?: string) => void;
@@ -14,7 +13,6 @@ interface MonthGridProps {
   date: Date;
   currentDate: Date;
   events: CalendarEvent[];
-  onEventClick: (event: CalendarEvent) => void;
   onDayDoubleClick: (date: Date, time?: string) => void;
   onDayClick?: (date: Date) => void;
 }
@@ -33,7 +31,6 @@ const MonthGrid: React.FC<MonthGridProps> = ({
   date,
   currentDate,
   events,
-  onEventClick,
   onDayDoubleClick,
   onDayClick,
 }) => {
@@ -72,35 +69,24 @@ const MonthGrid: React.FC<MonthGridProps> = ({
       });
   };
 
-
-
-  // Add click timer state
-  const [clickTimer, setClickTimer] = useState<NodeJS.Timeout | null>(null);
-  const clickCountRef = useRef(0);
-  const [, setRerender] = useState(0); // force rerender for clickCount
-
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+  
   const handleClick = (day: Date, e: React.MouseEvent) => {
+    // Prevent if clicking on an event (events are now non-clickable)
     if ((e.target as HTMLElement).closest('button')) return;
+    
     if (isMobile) {
-      onDayDoubleClick(day, '');
+      // On mobile, single click opens full schedule
+      onDayClick?.(day);
       return;
     }
-    clickCountRef.current += 1;
-    setRerender(x => x + 1); // force rerender
-    if (clickTimer) clearTimeout(clickTimer);
-    const timer = setTimeout(() => {
-      if (clickCountRef.current === 1) {
-        onDayClick?.(day);
-      }
-      clickCountRef.current = 0;
-      setRerender(x => x + 1);
-    }, 250);
-    setClickTimer(timer);
+    
+    // On desktop, single click opens full schedule
+    onDayClick?.(day);
   };
 
   const handleDoubleClick = (day: Date) => {
-    // Call onDayDoubleClick on double click
+    // Double click still opens appointment modal
     onDayDoubleClick(day, '');
   };
 
@@ -135,28 +121,24 @@ const MonthGrid: React.FC<MonthGridProps> = ({
               )}
               <div className="flex flex-col gap-0.5 sm:gap-1 mt-5 sm:mt-6">
                 {eventsForDay.slice(0, maxEventsMobile).map((event, i) => (
-                  <button
+                  <div
                     key={event.appointment.id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEventClick(event);
-                    }}
-                    className={`w-full text-left rounded-lg px-1 sm:px-2 py-0.5 sm:py-1 truncate font-medium text-[11px] sm:text-xs text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-100 ${eventColors[i % eventColors.length]} ${isToday ? 'ring-2 ring-blue-200' : ''}`}
+                    className={`w-full text-left rounded-lg px-1 sm:px-2 py-0.5 sm:py-1 truncate font-medium text-[11px] sm:text-xs text-white shadow-sm ${eventColors[i % eventColors.length]} ${isToday ? 'ring-2 ring-blue-200' : ''}`}
                     style={{ minHeight: 18 }}
                   >
                     {event.appointment.eventFrom || event.appointment.programName || 'No Title'}
-                  </button>
+                  </div>
                 ))}
                 {showMore && (
-                  <button
-                    className="w-full text-center text-[11px] text-blue-500 mt-0.5 underline"
+                  <div
+                    className="w-full text-center text-[11px] text-blue-500 mt-0.5 underline cursor-pointer"
                     onClick={e => {
                       e.stopPropagation();
-                      handleDoubleClick(day!);
+                      onDayClick?.(day!);
                     }}
                   >
                     +{eventsForDay.length - maxEventsMobile} more
-                  </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -170,7 +152,6 @@ const MonthGrid: React.FC<MonthGridProps> = ({
 export function MonthView({ 
   events, 
   currentDate, 
-  onEventClick, 
   onDayDoubleClick,
   onDayClick,
 }: MonthViewProps) {
@@ -180,7 +161,6 @@ export function MonthView({
         date={currentDate}
         currentDate={currentDate}
         events={events}
-        onEventClick={onEventClick}
         onDayDoubleClick={onDayDoubleClick}
         onDayClick={onDayClick}
       />

@@ -9,7 +9,7 @@ export async function PATCH(req: Request, context: any) {
   if (!session?.user) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
-  const { id } = context.params;
+  const { id } = await context.params;
   try {
     const updates = await req.json();
     const updated = await updateBirthday(id, updates);
@@ -29,7 +29,7 @@ export async function DELETE(req: Request, context: any) {
   if (!session?.user) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
-  const { id } = context.params;
+  const { id } = await context.params;
   try {
     await deleteBirthday(id);
     return new NextResponse(null, { status: 204 });

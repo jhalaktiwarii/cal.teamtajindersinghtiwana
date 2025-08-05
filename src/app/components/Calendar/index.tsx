@@ -22,9 +22,11 @@ interface CalendarViewProps {
   birthdays: Birthday[];
   onSaveBirthday: (bday: Birthday) => void;
   onDeleteBirthday: (id: string) => void;
+  isSidebarOpen?: boolean;
 }
 
-const viewModes: (string)[] = ['day', 'week', 'month', 'year', 'birthday'];
+// Only these views can be changed by swiping
+const swipeableViewModes: (string)[] = ['day', 'week', 'month', 'year'];
 
 export function CalendarView({
   viewMode,
@@ -39,6 +41,8 @@ export function CalendarView({
   birthdays,
   onSaveBirthday,
   onDeleteBirthday,
+  onDateChange,
+  isSidebarOpen,
 
 }: CalendarViewProps) {
   // Swipe gesture support
@@ -54,15 +58,18 @@ export function CalendarView({
     if (touchStartX.current !== null && touchEndX.current !== null) {
       const diff = touchEndX.current - touchStartX.current;
       if (Math.abs(diff) > 50) { // threshold
-        const currentIdx = viewModes.indexOf(viewMode);
-        if (diff < 0) {
-          // Swipe left: next view
-          const nextIdx = (currentIdx + 1) % viewModes.length;
-          onViewModeChange(viewModes[nextIdx]);
-        } else {
-          // Swipe right: previous view
-          const prevIdx = (currentIdx - 1 + viewModes.length) % viewModes.length;
-          onViewModeChange(viewModes[prevIdx]);
+        // Only allow swiping if we're in a swipeable view (not birthday)
+        if (swipeableViewModes.includes(viewMode)) {
+          const currentIdx = swipeableViewModes.indexOf(viewMode);
+          if (diff < 0) {
+            // Swipe left: next view
+            const nextIdx = (currentIdx + 1) % swipeableViewModes.length;
+            onViewModeChange(swipeableViewModes[nextIdx]);
+          } else {
+            // Swipe right: previous view
+            const prevIdx = (currentIdx - 1 + swipeableViewModes.length) % swipeableViewModes.length;
+            onViewModeChange(swipeableViewModes[prevIdx]);
+          }
         }
       }
     }
@@ -91,6 +98,7 @@ export function CalendarView({
         onPrevious={onPrevious}
         onNext={onNext}
         onViewModeChange={onViewModeChange}
+        isSidebarOpen={isSidebarOpen}
       />
       <div className="flex-1 min-h-0 overflow-auto hide-scrollbar w-full">
         {viewMode === 'birthday' ? (
@@ -103,8 +111,8 @@ export function CalendarView({
           <MonthView
             events={events}
             currentDate={currentDate}
-            onEventClick={onEventClick}
             onDayDoubleClick={onDayDoubleClick}
+            onDayClick={onDateChange}
             onAddAppointment={onAddAppointment}
           />
         ) : viewMode === 'week' ? (

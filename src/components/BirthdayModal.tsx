@@ -20,6 +20,7 @@ export default function BirthdayModal({ open, onClose, onSave, onDelete, initial
   const [fullName, setFullName] = useState(initialBirthday?.fullName || '');
   const [address, setAddress] = useState(initialBirthday?.address || '');
   const [phone, setPhone] = useState(initialBirthday?.phone || '');
+  const [ward, setWard] = useState(initialBirthday?.ward || '');
   const [day, setDay] = useState(initialBirthday?.day || 1);
   const [month, setMonth] = useState(initialBirthday?.month || 1);
   const [year, setYear] = useState(initialBirthday?.year || new Date().getFullYear());
@@ -45,6 +46,7 @@ export default function BirthdayModal({ open, onClose, onSave, onDelete, initial
     setFullName(initialBirthday?.fullName || '');
     setAddress(initialBirthday?.address || '');
     setPhone(initialBirthday?.phone || '');
+    setWard(initialBirthday?.ward || '');
     setDay(initialBirthday?.day || 1);
     setMonth(initialBirthday?.month || 1);
     setYear(initialBirthday?.year || new Date().getFullYear());
@@ -69,6 +71,7 @@ export default function BirthdayModal({ open, onClose, onSave, onDelete, initial
         fullName,
         address: address || undefined,
         phone: phone || undefined,
+        ward: ward || undefined,
         day,
         month,
         year,
@@ -79,6 +82,7 @@ export default function BirthdayModal({ open, onClose, onSave, onDelete, initial
         fullName,
         address: address || undefined,
         phone: phone || undefined,
+        ward: ward || undefined,
         day,
         month,
         year,
@@ -129,6 +133,10 @@ export default function BirthdayModal({ open, onClose, onSave, onDelete, initial
           <div>
             <label className="block mb-1 font-medium">Phone Number (Optional)</label>
             <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="Enter phone number" />
+          </div>
+          <div>
+            <label className="block mb-1 font-medium">Ward (Optional)</label>
+            <Input value={ward} onChange={e => setWard(e.target.value)} placeholder="Enter ward" />
           </div>
           
           {/* Birthday Date Fields */}

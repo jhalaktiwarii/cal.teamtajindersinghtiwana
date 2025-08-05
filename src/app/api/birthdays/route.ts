@@ -37,6 +37,7 @@ export async function GET() {
           year: birthday.year || undefined,
           address: birthday.address || undefined,
           phone: birthday.phone || undefined,
+          ward: birthday.ward || undefined,
           reminder: birthday.reminder || '09:00' // Default reminder time
         };
         

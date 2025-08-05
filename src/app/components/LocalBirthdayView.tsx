@@ -30,7 +30,8 @@ export function LocalBirthdayView() {
     const s = search.toLowerCase();
     return birthdays.filter(b =>
       b.fullName.toLowerCase().includes(s) ||
-      (b.phone && b.phone.includes(s))
+      (b.phone && b.phone.includes(s)) ||
+      (b.ward && b.ward.toLowerCase().includes(s))
     );
   }, [birthdays, search]);
 
@@ -64,6 +65,7 @@ export function LocalBirthdayView() {
           fullName: birthday.fullName,
           address: birthday.address,
           phone: birthday.phone,
+          ward: birthday.ward,
           day: birthday.day,
           month: birthday.month,
           year: birthday.year,

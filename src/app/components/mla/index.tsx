@@ -1,13 +1,13 @@
 "use client"
 
-import React, { useState, } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppointments } from '@/app/hooks/useAppointments';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format, addDays, startOfToday, parseISO } from 'date-fns';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Search, LogOut, CheckCircle2, XCircle, AlertTriangle, X, Download, Share2 } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Search, LogOut, CheckCircle2, XCircle, AlertTriangle, X, Download, Share2, Gift } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
@@ -16,6 +16,8 @@ import { jsPDF } from 'jspdf';
 import { ShareDialog } from '../ShareDialog';
 import { CalendarEvent } from '@/app/types';
 import { toMarathiTime } from '@/app/utils/dateUtils';
+import { BirthdayView } from '../BirthdayView';
+import type { Birthday } from '@/app/types/birthday';
 
 export default function MLAView() {
   const { appointments, loading, updateAppointment } = useAppointments();
@@ -24,6 +26,8 @@ export default function MLAView() {
   const [startIndex, setStartIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'appointments' | 'birthdays'>('appointments');
+  const [birthdays, setBirthdays] = useState<Birthday[]>([]);
   
   const dates = Array.from({ length: 3 }, (_, i) => addDays(startOfToday(), startIndex + i));
 
@@ -80,6 +84,78 @@ export default function MLAView() {
   const handleNext = () => setStartIndex(prev => prev + 1);
   const handlePrev = () => setStartIndex(prev => Math.max(0, prev - 1));
 
+  // Birthday functionality
+  useEffect(() => {
+    async function fetchBirthdays() {
+      try {
+        console.log('Fetching birthdays...');
+        const res = await fetch('/api/birthdays');
+        if (!res.ok) {
+          console.error('Failed to fetch birthdays:', res.status, res.statusText);
+          throw new Error(`Failed to fetch birthdays: ${res.status} ${res.statusText}`);
+        }
+        const data = await res.json();
+        console.log('Raw birthday data:', data);
+        
+        // Filter out any invalid birthday records to prevent crashes
+        const validBirthdays = data.filter((bday: Birthday) => 
+          bday && 
+          bday.id && 
+          bday.fullName && 
+          typeof bday.day === 'number' && 
+          typeof bday.month === 'number' &&
+          bday.day >= 1 && bday.day <= 31 &&
+          bday.month >= 1 && bday.month <= 12
+        );
+        
+        setBirthdays(validBirthdays);
+      } catch (error) {
+        console.error('Error fetching birthdays:', error);
+      }
+    }
+
+    fetchBirthdays();
+  }, []);
+
+  const handleSaveBirthday = async (bday: Birthday) => {
+    try {
+      if (bday.id) {
+        // Update existing birthday
+        const res = await fetch(`/api/birthdays/${bday.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bday),
+        });
+        if (res.ok) {
+          setBirthdays(prev => prev.map(b => b.id === bday.id ? bday : b));
+        }
+      } else {
+        // Create new birthday
+        const res = await fetch('/api/birthdays', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bday),
+        });
+        if (res.ok) {
+          const newBirthday = await res.json();
+          setBirthdays(prev => [...prev, newBirthday]);
+        }
+      }
+    } catch (error) {
+      console.error('Error saving birthday:', error);
+    }
+  };
+  
+  const handleDeleteBirthday = async (id: string) => {
+    try {
+      const res = await fetch(`/api/birthdays/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setBirthdays(prev => prev.filter(b => b.id !== id));
+      }
+    } catch (error) {
+      console.error('Error deleting birthday:', error);
+    }
+  };
 
 
   interface PDFOptions {
@@ -222,214 +298,246 @@ export default function MLAView() {
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-1 sm:gap-2 mb-4 sm:mb-6">
-          {['all', 'going', 'not-going', 'scheduled'].map((filter) => (
+        {/* View Mode Toggle */}
+        <div className="flex justify-center mb-4 sm:mb-6">
+          <div className="flex bg-gray-100 rounded-lg p-1">
             <Button
-              key={filter}
-              variant={selectedFilter === filter ? "default" : "outline"}
-              onClick={() => setSelectedFilter(filter)}
-              className="text-xs sm:text-sm px-2 sm:px-4 h-8 sm:h-10"
+              variant={viewMode === 'appointments' ? "default" : "ghost"}
+              onClick={() => setViewMode('appointments')}
+              className="rounded-md"
             >
-              {filter.charAt(0).toUpperCase() + filter.slice(1).replace('-', ' ')}
+              Appointments
             </Button>
-          ))}
+            <Button
+              variant={viewMode === 'birthdays' ? "default" : "ghost"}
+              onClick={() => setViewMode('birthdays')}
+              className="rounded-md"
+            >
+              <Gift className="h-4 w-4 mr-2" />
+              Birthdays
+            </Button>
+          </div>
         </div>
 
-        {/* Appointments */}
-        <div className="space-y-1">
-          {filteredAppointments.map((event, index) => {
-            const key = event.appointment?.id || `appointment-${index}`;
-            return (
-              <Dialog key={key}>
-                <DialogTrigger asChild>
-                  <div
-                    className={cn(
-                      "flex items-center justify-between p-2 rounded-lg transition-colors",
-                      getAppointmentBackground(event.appointment?.status || 'scheduled', event.appointment?.isUrgent || false),
-                      "cursor-pointer"
-                    )}
-                  >
-                    <div className="flex-1 min-w-0 mr-2">
-                      <div className="flex items-center space-x-2">
-                        <p className={cn(
-                          "text-sm font-medium truncate",
-                          event.appointment?.isUrgent ? "text-red-700" : "text-gray-900"
-                        )}>
-                          {event.appointment?.programName}
-                        </p>
-                        {event.appointment?.isUrgent && (
-                          <AlertTriangle className="h-3 w-3 text-red-500" />
-                        )}
-                      </div>
-                      <div className="flex items-center text-xs text-gray-500 mt-0.5">
-                        <span className="whitespace-nowrap">
-                          {event.appointment?.startTime ? 
-                            format(parseISO(event.appointment.startTime), "h:mm a") : 
-                            'Time not set'}
-                        </span>
-                        <span className="mx-2">•</span>
-                        <span className="truncate">{event.appointment?.address}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                      {event.appointment?.status === 'going' && (
-                        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            onClick={() => {
-                              if (event.appointment?.id) {
-                                handleStatusChange(event.appointment.id, 'not-going');
-                              }
-                            }}
-                            className="h-6 w-6 p-0"
-                            title="Mark as Not Going"
-                          >
-                            <XCircle className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </div>
-                      )}
-                      {event.appointment?.status === 'not-going' && (
-                        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            onClick={() => {
-                              if (event.appointment?.id) {
-                                handleStatusChange(event.appointment.id, 'going');
-                              }
-                            }}
-                            className="h-6 w-6 p-0"
-                            title="Mark as Going"
-                          >
-                            <CheckCircle2 className="h-4 w-4 text-green-600" />
-                          </Button>
-                        </div>
-                      )}
-                      {event.appointment?.status !== 'going' && event.appointment?.status !== 'not-going' && (
-                        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            onClick={() => {
-                              if (event.appointment?.id) {
-                                handleStatusChange(event.appointment.id, 'going');
-                              }
-                            }}
-                            className="h-6 w-6 p-0"
-                            title="Mark as Going"
-                          >
-                            <CheckCircle2 className="h-4 w-4 text-green-600" />
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            onClick={() => {
-                              if (event.appointment?.id) {
-                                handleStatusChange(event.appointment.id, 'not-going');
-                              }
-                            }}
-                            className="h-6 w-6 p-0"
-                            title="Mark as Not Going"
-                          >
-                            <XCircle className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </div>
-                      )}
-                      <span className={cn(
-                        "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap",
-                        getStatusColor(event.appointment?.status ?? 'scheduled')
-                      )}>
-                        {(event.appointment?.status ?? 'Scheduled').charAt(0).toUpperCase() + 
-                         (event.appointment?.status ?? 'scheduled').slice(1)}
-                      </span>
-                    </div>
-                  </div>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle>Appointment Address</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="grid gap-4">
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium leading-none">Schedule</h4>
-                        <div className="text-sm text-muted-foreground">
-                          <div>Date: {event.appointment?.startTime ? format(parseISO(event.appointment.startTime), "PPP") : 'Date not set'}</div>
-                          <div>Time: {event.appointment?.startTime ? `${format(parseISO(event.appointment.startTime), "h:mm a")}` : 'Time not set'}</div>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium leading-none">Address</h4>
-                        <div className="text-sm text-muted-foreground">
-                          {event.appointment?.address || 'No address provided'}
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium leading-none">Contact</h4>
-                        <div className="text-sm text-muted-foreground">
-                          {event.appointment?.contactNo || 'No contact provided'}
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium leading-none">Status</h4>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              if (event.appointment?.id) {
-                                handleStatusChange(event.appointment.id, 'going');
-                              }
-                            }}
-                            className={cn(
-                              "rounded-full",
-                              event.appointment?.status === 'going' && "bg-emerald-100 text-emerald-800"
-                            )}
-                          >
-                            Going
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              if (event.appointment?.id) {
-                                handleStatusChange(event.appointment.id, 'not-going');
-                              }
-                            }}
-                            className={cn(
-                              "rounded-full",
-                              event.appointment?.status === 'not-going' && "bg-red-100 text-red-800"
-                            )}
-                          >
-                            Not Going
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <h4 className="text-sm font-medium">Urgent</h4>
-                        <Switch
-                          checked={event.appointment?.isUrgent}
-                          disabled
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            );
-          })}
-          {filteredAppointments.length === 0 && (
-            <div className="p-4 text-center text-sm text-gray-500">
-              No appointments found
+        {/* Conditional Content */}
+        {viewMode === 'appointments' ? (
+          <>
+            {/* Filters */}
+            <div className="flex flex-wrap gap-1 sm:gap-2 mb-4 sm:mb-6">
+              {['all', 'going', 'not-going', 'scheduled'].map((filter) => (
+                <Button
+                  key={filter}
+                  variant={selectedFilter === filter ? "default" : "outline"}
+                  onClick={() => setSelectedFilter(filter)}
+                  className="text-xs sm:text-sm px-2 sm:px-4 h-8 sm:h-10"
+                >
+                  {filter.charAt(0).toUpperCase() + filter.slice(1).replace('-', ' ')}
+                </Button>
+              ))}
             </div>
-          )}
-        </div>
+
+            {/* Appointments */}
+            <div className="space-y-1">
+              {filteredAppointments.map((event, index) => {
+                const key = event.appointment?.id || `appointment-${index}`;
+                return (
+                  <Dialog key={key}>
+                    <DialogTrigger asChild>
+                      <div
+                        className={cn(
+                          "flex items-center justify-between p-2 rounded-lg transition-colors",
+                          getAppointmentBackground(event.appointment?.status || 'scheduled', event.appointment?.isUrgent || false),
+                          "cursor-pointer"
+                        )}
+                      >
+                        <div className="flex-1 min-w-0 mr-2">
+                          <div className="flex items-center space-x-2">
+                            <p className={cn(
+                              "text-sm font-medium truncate",
+                              event.appointment?.isUrgent ? "text-red-700" : "text-gray-900"
+                            )}>
+                              {event.appointment?.programName}
+                            </p>
+                            {event.appointment?.isUrgent && (
+                              <AlertTriangle className="h-3 w-3 text-red-500" />
+                            )}
+                          </div>
+                          <div className="flex items-center text-xs text-gray-500 mt-0.5">
+                            <span className="whitespace-nowrap">
+                              {event.appointment?.startTime ? 
+                                format(parseISO(event.appointment.startTime), "h:mm a") : 
+                                'Time not set'}
+                            </span>
+                            <span className="mx-2">•</span>
+                            <span className="truncate">{event.appointment?.address}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          {event.appointment?.status === 'going' && (
+                            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                onClick={() => {
+                                  if (event.appointment?.id) {
+                                    handleStatusChange(event.appointment.id, 'not-going');
+                                  }
+                                }}
+                                className="h-6 w-6 p-0"
+                                title="Mark as Not Going"
+                              >
+                                <XCircle className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </div>
+                          )}
+                          {event.appointment?.status === 'not-going' && (
+                            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                onClick={() => {
+                                  if (event.appointment?.id) {
+                                    handleStatusChange(event.appointment.id, 'going');
+                                  }
+                                }}
+                                className="h-6 w-6 p-0"
+                                title="Mark as Going"
+                              >
+                                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                              </Button>
+                            </div>
+                          )}
+                          {event.appointment?.status !== 'going' && event.appointment?.status !== 'not-going' && (
+                            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                onClick={() => {
+                                  if (event.appointment?.id) {
+                                    handleStatusChange(event.appointment.id, 'going');
+                                  }
+                                }}
+                                className="h-6 w-6 p-0"
+                                title="Mark as Going"
+                              >
+                                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                onClick={() => {
+                                  if (event.appointment?.id) {
+                                    handleStatusChange(event.appointment.id, 'not-going');
+                                  }
+                                }}
+                                className="h-6 w-6 p-0"
+                                title="Mark as Not Going"
+                              >
+                                <XCircle className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </div>
+                          )}
+                          <span className={cn(
+                            "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap",
+                            getStatusColor(event.appointment?.status ?? 'scheduled')
+                          )}>
+                            {(event.appointment?.status ?? 'Scheduled').charAt(0).toUpperCase() + 
+                             (event.appointment?.status ?? 'scheduled').slice(1)}
+                          </span>
+                        </div>
+                      </div>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Appointment Address</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="grid gap-4">
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-medium leading-none">Schedule</h4>
+                            <div className="text-sm text-muted-foreground">
+                              <div>Date: {event.appointment?.startTime ? format(parseISO(event.appointment.startTime), "PPP") : 'Date not set'}</div>
+                              <div>Time: {event.appointment?.startTime ? `${format(parseISO(event.appointment.startTime), "h:mm a")}` : 'Time not set'}</div>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-medium leading-none">Address</h4>
+                            <div className="text-sm text-muted-foreground">
+                              {event.appointment?.address || 'No address provided'}
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-medium leading-none">Contact</h4>
+                            <div className="text-sm text-muted-foreground">
+                              {event.appointment?.contactNo || 'No contact provided'}
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-medium leading-none">Status</h4>
+                            <div className="flex space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  if (event.appointment?.id) {
+                                    handleStatusChange(event.appointment.id, 'going');
+                                  }
+                                }}
+                                className={cn(
+                                  "rounded-full",
+                                  event.appointment?.status === 'going' && "bg-emerald-100 text-emerald-800"
+                                )}
+                              >
+                                Going
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  if (event.appointment?.id) {
+                                    handleStatusChange(event.appointment.id, 'not-going');
+                                  }
+                                }}
+                                className={cn(
+                                  "rounded-full",
+                                  event.appointment?.status === 'not-going' && "bg-red-100 text-red-800"
+                                )}
+                              >
+                                Not Going
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <h4 className="text-sm font-medium">Urgent</h4>
+                            <Switch
+                              checked={event.appointment?.isUrgent}
+                              disabled
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                );
+              })}
+              {filteredAppointments.length === 0 && (
+                <div className="p-4 text-center text-sm text-gray-500">
+                  No appointments found
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <BirthdayView
+            birthdays={birthdays}
+            onSave={handleSaveBirthday}
+            onDelete={handleDeleteBirthday}
+          />
+        )}
       </main>
       {/* Export and Share Buttons */}
-      <div className="fixed bottom-4 right-4 flex gap-2">
+      <div className="fixed bottom-4 left-4 flex gap-2">
         <Button
           variant="outline"
           className="bg-white"
