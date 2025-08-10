@@ -127,7 +127,7 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
         ...appointment.appointment,
         status
       }).then(() => {
-        toast.success(`Appointment status updated to ${status}`);
+        toast.success('Appointment status updated');
       }).catch(error => {
         console.error('Error updating appointment status:', error);
         toast.error(`Failed to update appointment status: ${error.message}`);

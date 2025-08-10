@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Gift, Upload } from 'lucide-react';
+import { Gift, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BirthdayList } from './Sidebar/BirthdayList';
 import BirthdayModal from '../../components/BirthdayModal';
@@ -112,13 +112,23 @@ export function BirthdayView({ birthdays, onSave, onDelete }: BirthdayViewProps)
       </div>
 
       <div className="mb-4 flex flex-col xs:flex-row gap-2 items-start xs:items-center">
-        <input
-          type="text"
-          placeholder="Search by name..."
-          className="border rounded px-2 xs:px-3 py-2 w-full text-xs xs:text-sm sm:text-base"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
+        <div className="relative flex-1">
+          <input
+            type="text"
+            placeholder="Search by name..."
+            className="border rounded px-2 xs:px-3 py-2 w-full text-xs xs:text-sm sm:text-base pr-8"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 hover:text-gray-600"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
         <Button
           variant="outline"
           className="w-full xs:w-auto text-xs xs:text-sm sm:text-base whitespace-nowrap"

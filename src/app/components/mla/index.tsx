@@ -35,7 +35,7 @@ export default function MLAView() {
   const handleStatusChange = async (id: string, newStatus: 'going' | 'not-going' | 'scheduled') => {
     try {
       await updateAppointment(id, { status: newStatus });
-      toast.success(`Appointment status updated to ${newStatus}`);
+      toast.success('Appointment status updated');
     } catch (error) {
       console.error('Error updating appointment status:', error);
       toast.error('Failed to update appointment status.');
@@ -184,9 +184,17 @@ export default function MLAView() {
               <Input 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 sm:pl-10 text-sm sm:text-base h-8 sm:h-10" 
+                className="w-full pl-8 sm:pl-10 pr-8 sm:pr-10 text-sm sm:text-base h-8 sm:h-10" 
                 placeholder="Search appointments..."
               />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 h-4 sm:h-5 w-4 sm:w-5 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-4 sm:h-5 w-4 sm:w-5" />
+                </button>
+              )}
             </div>
             <Button 
               variant="ghost" 

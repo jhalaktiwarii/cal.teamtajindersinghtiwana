@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Download, Search, Share2, LogOut } from 'lucide-react';
+import { CalendarIcon, Download, Search, Share2, LogOut, X } from 'lucide-react';
 import { format, isToday, isTomorrow, isAfter, isBefore, startOfDay, isEqual, addDays } from 'date-fns';
 import { cn } from "@/lib/utils";
 import { signOut } from "next-auth/react";
@@ -196,10 +196,18 @@ export function Sidebar({
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search appointments..."
-              className="pl-8"
+              className="pl-8 pr-8"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-2.5 h-4 w-4 text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
 
           <div className="flex gap-2">

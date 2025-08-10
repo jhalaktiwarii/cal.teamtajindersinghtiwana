@@ -131,6 +131,11 @@ export function BirthdayList({ birthdays, onEdit, onDelete }: BirthdayListProps)
           <p className="text-sm xs:text-base">Some birthday entries have invalid data and have been filtered out.</p>
         </div>
       )}
+      {birthdays.length === 0 && (
+        <div className="text-center py-4 text-gray-500">
+          <p className="text-sm xs:text-base">No birthdays found</p>
+        </div>
+      )}
     </div>
   );
 } 
