@@ -83,7 +83,7 @@ export default function AddScheduleDialog({ open, onClose, onSave }: AddSchedule
             <label className="block mb-1 font-medium">Contact No</label>
             <Input value={contactNo} onChange={e => setContactNo(e.target.value)} placeholder="Enter contact number" required />
           </div>
-          <Button type="submit" className="w-full bg-black text-white hover:bg-black/90 h-10 mt-2 rounded-md font-medium transition-colors" disabled={isSaving}>
+          <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white h-10 mt-2 rounded-md font-medium transition-colors" disabled={isSaving}>
             {isSaving ? 'Saving...' : 'Save Appointment'}
           </Button>
         </form>

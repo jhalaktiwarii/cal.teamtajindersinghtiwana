@@ -8,4 +8,5 @@ export interface Birthday {
   month: number; // Month (1-12)
   year?: number; // Birth year (optional)
   reminder: string; // ISO time string
+  status?: 'pending' | 'approved' | 'declined'; // Approval status for MLA workflow
 } 

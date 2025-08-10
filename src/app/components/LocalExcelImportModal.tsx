@@ -450,7 +450,7 @@ export default function LocalExcelImportModal({ open, onClose, onImportComplete 
 
               // Check for duplicates in the current import batch
               const isDuplicate = result.birthdays.some(existing => 
-                lower(existing.fullName) === lower(fullName) && 
+                existing.fullName.toLowerCase() === fullName.toLowerCase() && 
                 existing.day === day && 
                 existing.month === month && 
                 existing.year === year
@@ -459,7 +459,7 @@ export default function LocalExcelImportModal({ open, onClose, onImportComplete 
               if (isDuplicate) {
                 // Replace the existing entry with the new one
                 const existingIndex = result.birthdays.findIndex(existing => 
-                  lower(existing.fullName) === lower(fullName) && 
+                  existing.fullName.toLowerCase() === fullName.toLowerCase() && 
                   existing.day === day && 
                   existing.month === month && 
                   existing.year === year

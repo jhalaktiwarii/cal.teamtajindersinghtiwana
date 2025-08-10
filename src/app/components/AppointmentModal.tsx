@@ -208,7 +208,7 @@ export function AppointmentModal({
 
               <Button
                 type="submit"
-                className="w-full bg-black text-white hover:bg-black/90 h-9 mt-3 rounded-md font-medium transition-colors"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white h-9 mt-3 rounded-md font-medium transition-colors"
                 disabled={isSubmitting}
               >
                 {isSubmitting
