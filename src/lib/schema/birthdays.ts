@@ -2,6 +2,7 @@ import { CreateTableCommand, DynamoDBClient, ListTablesCommand, DescribeTableCom
 import { DeleteCommand, GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { dynamoDb } from "../dynamodb";
 import type { Birthday } from "@/app/types/birthday";
+import { getTableName, getTableConfig } from "./constants";
 
 let tableInitialized = false;
 
@@ -16,10 +17,10 @@ export async function ensureBirthdaysTable() {
   });
   try {
     const listTablesResponse = await client.send(new ListTablesCommand({}));
-    const tableExists = listTablesResponse.TableNames?.includes('Birthdays');
+    const tableExists = listTablesResponse.TableNames?.includes(getTableName("BIRTHDAYS"));
     if (!tableExists) {
       await client.send(new CreateTableCommand({
-        TableName: 'Birthdays',
+        TableName: getTableName("BIRTHDAYS"),
         AttributeDefinitions: [
           { AttributeName: "id", AttributeType: "S" },
         ],
@@ -33,7 +34,7 @@ export async function ensureBirthdaysTable() {
       }));
       let tableActive = false;
       while (!tableActive) {
-        const describeTableResponse = await client.send(new DescribeTableCommand({ TableName: 'Birthdays' }));
+        const describeTableResponse = await client.send(new DescribeTableCommand({ TableName: getTableName("BIRTHDAYS") }));
         if (describeTableResponse.Table?.TableStatus === 'ACTIVE') {
           tableActive = true;
         } else {
@@ -87,7 +88,7 @@ export async function findBirthdayByNameAndDate(fullName: string, day: number, m
   }
 
   const result = await dynamoDb.send(new ScanCommand({ 
-    TableName: 'Birthdays',
+    TableName: getTableName("BIRTHDAYS"),
     FilterExpression: filterExpression,
     ExpressionAttributeNames: expressionAttributeNames,
     ExpressionAttributeValues: expressionAttributeValues
@@ -116,7 +117,7 @@ export async function createBirthday(birthday: Omit<Birthday, 'id'>): Promise<{ 
     };
     
     await dynamoDb.send(new PutCommand({ 
-      TableName: 'Birthdays', 
+      TableName: getTableName("BIRTHDAYS"), 
       Item: updatedBirthday 
     }));
     
@@ -125,27 +126,27 @@ export async function createBirthday(birthday: Omit<Birthday, 'id'>): Promise<{ 
     // Create new birthday
     const id = `bday_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const newBirthday: Birthday = { id, ...birthday };
-    await dynamoDb.send(new PutCommand({ TableName: 'Birthdays', Item: newBirthday }));
+    await dynamoDb.send(new PutCommand({ TableName: getTableName("BIRTHDAYS"), Item: newBirthday }));
     return { birthday: newBirthday, wasReplaced: false };
   }
 }
 
 export async function getBirthdays(): Promise<Birthday[]> {
   await ensureBirthdaysTable();
-  const result = await dynamoDb.send(new ScanCommand({ TableName: 'Birthdays' }));
+  const result = await dynamoDb.send(new ScanCommand({ TableName: getTableName("BIRTHDAYS") }));
   return (result.Items as Birthday[]) || [];
 }
 
 export async function updateBirthday(id: string, updates: Partial<Birthday>): Promise<Birthday | null> {
   await ensureBirthdaysTable();
-  const getResult = await dynamoDb.send(new GetCommand({ TableName: 'Birthdays', Key: { id } }));
+  const getResult = await dynamoDb.send(new GetCommand({ TableName: getTableName("BIRTHDAYS"), Key: { id } }));
   if (!getResult.Item) return null;
   const updated = { ...getResult.Item, ...updates };
-  await dynamoDb.send(new PutCommand({ TableName: 'Birthdays', Item: updated }));
+  await dynamoDb.send(new PutCommand({ TableName: getTableName("BIRTHDAYS"), Item: updated }));
   return updated as Birthday;
 }
 
 export async function deleteBirthday(id: string): Promise<void> {
   await ensureBirthdaysTable();
-  await dynamoDb.send(new DeleteCommand({ TableName: 'Birthdays', Key: { id } }));
+  await dynamoDb.send(new DeleteCommand({ TableName: getTableName("BIRTHDAYS"), Key: { id } }));
 } 

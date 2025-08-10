@@ -59,7 +59,7 @@ export function MonthGrid({
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col relative min-h-0">
       <div className="grid grid-cols-7 bg-neutral-50 border-b border-neutral-200 sticky top-0 z-10">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
           <div key={day} className="py-2 text-center text-sm font-medium text-neutral-600">
@@ -68,7 +68,7 @@ export function MonthGrid({
         ))}
       </div>
       
-      <div className="grid grid-cols-7 flex-1">
+      <div className="grid grid-cols-7 flex-1 overflow-auto min-h-0 thin-scrollbar">
         {days.map((day, index) => (
           <div
             key={day?.toISOString() ?? index}

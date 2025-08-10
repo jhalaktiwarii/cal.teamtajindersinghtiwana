@@ -54,44 +54,75 @@ export function WeekView({
   };
 
   return (
-    <div className="w-full h-full bg-white">
+    <div className="w-full h-full bg-white" style={{ ['--gutter-w' as any]: '64px' }}>
       {/* Day headers */}
-      <div className="grid grid-cols-8 border-b border-gray-200">
-        <div className="bg-white w-12"></div>
+      <header
+        className="
+          grid
+          [grid-template-columns:var(--gutter-w)_repeat(7,minmax(0,1fr))]
+          w-full
+          border-y border-gray-200
+          divide-x divide-gray-200
+          bg-white
+        "
+        role="row"
+      >
+        {/* Time gutter header cell (empty) */}
+        <div className="h-full flex items-center justify-center text-xs text-gray-500 bg-white" aria-hidden>
+          {/* Empty space for time gutter alignment */}
+        </div>
+
+        {/* Day headers */}
         {weekDates.map((date) => (
           <div
             key={date.toISOString()}
-            className="py-3 text-center font-semibold text-gray-700 text-base border-l border-gray-100"
+            role="columnheader"
+            aria-label={`${date.toLocaleDateString('en-US', { weekday: 'long' })} ${date.getDate()}`}
+            className="h-16 flex flex-col items-center justify-center text-sm font-medium py-3"
           >
-            <div>{date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-            <div className="text-lg font-bold mt-1">{date.getDate()}</div>
+            <div className="text-sm font-semibold text-gray-700">
+              {date.toLocaleDateString('en-US', { weekday: 'short' })}
+            </div>
+            <div className="text-lg font-bold mt-1 text-gray-900">
+              {date.getDate()}
+            </div>
           </div>
         ))}
-      </div>
+      </header>
+
       {/* Time grid */}
       <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-8">
+        <section
+          className="
+            grid
+            [grid-template-columns:var(--gutter-w)_repeat(7,minmax(0,1fr))]
+            w-full
+            divide-x divide-gray-200
+            border-b border-gray-200
+          "
+        >
           {/* Time column */}
-          <div className="flex flex-col border-r border-gray-200 w-12 min-w-[3rem]">
+          <aside className="flex flex-col border-r border-gray-200">
             {hours.map((hour) => (
               <div
                 key={hour}
-                className="h-12 text-xs text-gray-400 flex items-center justify-end pr-1 border-b border-gray-100"
+                className="h-12 text-xs text-gray-400 flex items-center justify-center border-b border-gray-200"
               >
                 {new Date(0, 0, 0, hour).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })}
               </div>
             ))}
-          </div>
+          </aside>
+
           {/* Day columns */}
           {weekDates.map((date) => (
-            <div key={date.toISOString()} className="flex flex-col border-r border-gray-100 relative min-w-0">
+            <div key={date.toISOString()} className="flex flex-col relative min-w-0">
               {/* Render a single absolutely positioned container for all events in this day */}
               <div key={date.toISOString()} className="relative flex-1 h-full" style={{ minHeight: `${hours.length * 48}px` }}>
                 {/* Render hour grid lines */}
                 {hours.map((hour) => (
                   <div
                     key={`cell-${hour}-${date.getTime()}`}
-                    className="h-12 border-b border-gray-100"
+                    className="h-12 border-b border-gray-200"
                     onDoubleClick={() => handleDayDoubleClick(date, hour)}
                   />
                 ))}
@@ -132,7 +163,7 @@ export function WeekView({
               </div>
             </div>
           ))}
-        </div>
+        </section>
       </div>
       {selectedDate && showSchedule && (
         <FullPageSchedule

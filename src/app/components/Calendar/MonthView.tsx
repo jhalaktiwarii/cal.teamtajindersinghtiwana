@@ -91,7 +91,7 @@ const MonthGrid: React.FC<MonthGridProps> = ({
   };
 
   return (
-    <div className="rounded-2xl shadow-xl bg-white p-2 md:p-6 w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col overflow-auto thin-scrollbar">
       <div className="grid grid-cols-7 mb-2">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
           <div key={day} className="text-center text-sm font-semibold text-gray-500 py-2 tracking-wide select-none">
@@ -156,7 +156,7 @@ export function MonthView({
   onDayClick,
 }: MonthViewProps) {
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col bg-white rounded-lg shadow-sm">
       <MonthGrid
         date={currentDate}
         currentDate={currentDate}

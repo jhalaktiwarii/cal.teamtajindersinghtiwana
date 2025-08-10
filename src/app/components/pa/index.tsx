@@ -291,7 +291,7 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
  
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden relative">
       {error && (
         <div className="fixed inset-0 z-50 bg-red-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-md">
@@ -323,7 +323,7 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
       </button>
 
       <div 
-        className={`fixed inset-y-0 left-0 z-40 w-80 transform transition-transform duration-300 ease-in-out bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 ${
+        className={`fixed inset-y-0 left-0 z-50 w-80 transform transition-transform duration-300 ease-in-out bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -359,8 +359,8 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
         })()}
       </div>
 
-        <main className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'ml-80' : 'ml-0'}`}>
-          <div className="h-full p-1 xs:p-2 sm:p-3 md:p-4 overflow-x-auto overflow-y-auto">
+        <main className={`flex-1 transition-all duration-300 overflow-hidden z-10 ${isSidebarOpen ? 'ml-80' : 'ml-0'}`}>
+          <div className="h-full p-1 xs:p-2 sm:p-3 md:p-4 overflow-auto thin-scrollbar">
             {(() => {
               try {
                 return (

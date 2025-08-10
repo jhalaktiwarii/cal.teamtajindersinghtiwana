@@ -22,6 +22,7 @@ import {
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu"
 import { ShareDialog } from '../ShareDialog';
+import { CollapsibleSection } from '@/components/ui/collapsible-section';
 import { BirthdayList } from './BirthdayList';
 import type { Birthday } from '@/app/types/birthday';
 
@@ -263,9 +264,9 @@ export function Sidebar({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {(selectedDate || selectedStatus !== 'all' || searchQuery) ? (
-          <AppointmentList
+          <CollapsibleSection
             title={
               selectedDate
                 ? `Appointments for ${format(selectedDate, "PPP")}`
@@ -273,51 +274,71 @@ export function Sidebar({
                 ? `${statusFilters.find(f => f.value === selectedStatus)?.label} Appointments`
                 : "Search Results"
             }
-            appointments={filteredAppointments}
-            onStatusChange={onStatusChange}
-            onUrgencyChange={onUrgencyChange}
-          />
+            badge={filteredAppointments.length}
+            defaultOpen={true}
+          >
+            <AppointmentList
+              appointments={filteredAppointments}
+              onStatusChange={onStatusChange}
+              onUrgencyChange={onUrgencyChange}
+            />
+            {filteredAppointments.length === 0 && (
+              <div className="text-center text-gray-500 py-4">
+                No appointments found for the selected filters
+              </div>
+            )}
+          </CollapsibleSection>
         ) : (
           <>
-            <AppointmentList
-              title="Today's Appointments"
-              appointments={todayAppointments}
-              onStatusChange={onStatusChange}
-              onUrgencyChange={onUrgencyChange}
-            />
-            <AppointmentList
-              title="Tomorrow's Appointments"
-              appointments={tomorrowAppointments}
-              onStatusChange={onStatusChange}
-              onUrgencyChange={onUrgencyChange}
-            />
-            <AppointmentList
-              title="Upcoming Appointments"
-              appointments={upcomingAppointments}
-              onStatusChange={onStatusChange}
-              onUrgencyChange={onUrgencyChange}
-            />
+            <CollapsibleSection 
+              title="Today's Appointments" 
+              badge={todayAppointments.length}
+              defaultOpen={todayAppointments.length > 0}
+            >
+              <AppointmentList
+                appointments={todayAppointments}
+                onStatusChange={onStatusChange}
+                onUrgencyChange={onUrgencyChange}
+              />
+            </CollapsibleSection>
+
+            <CollapsibleSection 
+              title="Tomorrow's Appointments" 
+              badge={tomorrowAppointments.length}
+              defaultOpen={false}
+            >
+              <AppointmentList
+                appointments={tomorrowAppointments}
+                onStatusChange={onStatusChange}
+                onUrgencyChange={onUrgencyChange}
+              />
+            </CollapsibleSection>
+
+            <CollapsibleSection 
+              title="Upcoming Appointments" 
+              badge={upcomingAppointments.length}
+              defaultOpen={false}
+            >
+              <AppointmentList
+                appointments={upcomingAppointments}
+                onStatusChange={onStatusChange}
+                onUrgencyChange={onUrgencyChange}
+              />
+            </CollapsibleSection>
           </>
         )}
 
-        {(selectedDate || selectedStatus !== 'all' || searchQuery) && 
-         filteredAppointments.length === 0 && (
-          <div className="text-center text-gray-500 mt-8">
-            No appointments found for the selected filters
-          </div>
-        )}
-
-        {!selectedDate && selectedStatus === 'all' && !searchQuery && 
-         appointments.length === 0 && (
-          <div className="text-center text-gray-500 mt-8">
-            No appointments found
-          </div>
-        )}
-        <BirthdayList 
-          birthdays={birthdays} 
-          onEdit={b => onEditBirthday(b)}
-          onDelete={onDeleteBirthday}
-        />
+        <CollapsibleSection 
+          title="Upcoming Birthdays" 
+          badge={birthdays.length}
+          defaultOpen={false}
+        >
+          <BirthdayList 
+            birthdays={birthdays} 
+            onEdit={b => onEditBirthday(b)}
+            onDelete={onDeleteBirthday}
+          />
+        </CollapsibleSection>
       </div>
 
       <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">

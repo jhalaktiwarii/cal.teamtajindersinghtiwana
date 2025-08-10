@@ -119,15 +119,15 @@ export function DayView({ events, currentDate, onEventClick, onDayDoubleClick, o
                     <button
                       key={event.appointment.id}
                       onClick={() => onEventClick(event)}
-                      className="absolute left-2 right-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/50 hover:bg-blue-100 dark:hover:bg-blue-900/70 transition-colors shadow-sm border border-blue-100 dark:border-blue-800"
+                      className="absolute left-2 right-2 p-2 rounded-lg bg-blue-50 dark:bg-blue-900/50 hover:bg-blue-100 dark:hover:bg-blue-900/70 transition-colors shadow-sm border border-blue-100 dark:border-blue-800 min-h-[40px]"
                       style={style}
                     >
-                      <div className="flex flex-col h-full items-start">
+                      <div className="flex flex-col h-full justify-center">
                         <div className="w-full">
-                          <div className="text-base font-semibold text-gray-900 dark:text-white truncate">
+                          <div className="text-sm font-semibold text-gray-900 dark:text-white truncate leading-tight">
                             {event.appointment.eventFrom}
                           </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">
+                          <div className="text-xs text-gray-600 dark:text-gray-300 mt-1 leading-tight break-words">
                             {new Date(event.appointment.startTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
                           </div>
                         </div>

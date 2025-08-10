@@ -72,7 +72,6 @@ export function BirthdayList({ birthdays, onEdit, onDelete }: BirthdayListProps)
 
   return (
     <div>
-      <h3 className="text-base xs:text-lg font-semibold mb-4">Upcoming Birthdays</h3>
       <div className="space-y-2">
         {sorted.map((bday, index) => {
           // Create a unique key that handles all edge cases

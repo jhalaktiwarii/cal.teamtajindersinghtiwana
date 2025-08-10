@@ -1,6 +1,7 @@
 import { CreateTableCommand, DynamoDBClient, ListTablesCommand, DescribeTableCommand } from "@aws-sdk/client-dynamodb";
 import { DeleteCommand, GetCommand, PutCommand,  UpdateCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { dynamoDb } from "../dynamodb";
+import { getTableName, getTableConfig } from "./constants";
 
 let tableInitialized = false;
 
@@ -20,12 +21,12 @@ export async function ensureAppointmentsTable() {
   try {
     // First check if table exists
     const listTablesResponse = await client.send(new ListTablesCommand({}));
-    const tableExists = listTablesResponse.TableNames?.includes('Appointments');
+    const tableExists = listTablesResponse.TableNames?.includes(getTableName("APPOINTMENTS"));
 
     if (!tableExists) {
       // Create table if it doesn't exist
       await client.send(new CreateTableCommand({
-        TableName: 'Appointments',
+        TableName: getTableName("APPOINTMENTS"),
         AttributeDefinitions: [
           { AttributeName: "id", AttributeType: "S" },
           { AttributeName: "userid", AttributeType: "S" },
@@ -60,7 +61,7 @@ export async function ensureAppointmentsTable() {
       let tableActive = false;
       while (!tableActive) {
         const describeTableResponse = await client.send(new DescribeTableCommand({
-          TableName: 'Appointments'
+          TableName: getTableName("APPOINTMENTS")
         }));
         if (describeTableResponse.Table?.TableStatus === 'ACTIVE') {
           tableActive = true;
@@ -104,7 +105,7 @@ export async function createAppointment(appointment: Omit<Appointment, 'id' | 'c
   };
 
   await dynamoDb.send(new PutCommand({
-    TableName: 'Appointments',
+    TableName: getTableName("APPOINTMENTS"),
     Item: newAppointment,
   }));
 
@@ -113,7 +114,7 @@ export async function createAppointment(appointment: Omit<Appointment, 'id' | 'c
 
 export async function getAppointmentById(id: string): Promise<Appointment | null> {
   const result = await dynamoDb.send(new GetCommand({
-    TableName: 'Appointments',
+    TableName: getTableName("APPOINTMENTS"),
     Key: { id }
   }));
 
@@ -124,7 +125,7 @@ export async function getAppointmentsByPatient(): Promise<Appointment[]> {
   try {
     // Use scan to get all appointments since we might have appointments without patientId
     const result = await dynamoDb.send(new ScanCommand({
-      TableName: 'Appointments'
+      TableName: getTableName("APPOINTMENTS")
     }));
 
     // Filter appointments after fetching
@@ -169,7 +170,7 @@ export async function updateAppointment(
     const updateExpression = 'SET ' + updateParts.join(', ');
 
     const result = await dynamoDb.send(new UpdateCommand({
-      TableName: 'Appointments',
+      TableName: getTableName("APPOINTMENTS"),
       Key: { id },
       UpdateExpression: updateExpression,
       ExpressionAttributeValues: expressionAttributeValues,
@@ -186,7 +187,7 @@ export async function updateAppointment(
 
 export async function deleteAppointment(id: string): Promise<void> {
   await dynamoDb.send(new DeleteCommand({
-    TableName: 'Appointments',
+    TableName: getTableName("APPOINTMENTS"),
     Key: { id }
   }));
 }

@@ -1,6 +1,7 @@
 import { dynamoDb } from "../dynamodb";
 import { GetCommand, } from "@aws-sdk/lib-dynamodb";
 import { compare } from "bcrypt";
+import { getTableName } from "../schema/constants";
 
 export interface User {
   phone: string;
@@ -14,7 +15,7 @@ export async function getUserByPhone(phone: string): Promise<User | null> {
   try {
     const result = await dynamoDb.send(
       new GetCommand({
-        TableName: "Users",
+        TableName: getTableName("USERS"),
         Key: {
           phone: phone,
         },

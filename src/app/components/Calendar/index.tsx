@@ -91,6 +91,29 @@ export function CalendarView({
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
+        
+        .thin-scrollbar::-webkit-scrollbar {
+          width: 4px;
+          height: 4px;
+        }
+        
+        .thin-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        
+        .thin-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(156, 163, 175, 0.3);
+          border-radius: 2px;
+        }
+        
+        .thin-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(156, 163, 175, 0.5);
+        }
+        
+        .thin-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
+        }
       `}</style>
       <CalendarHeader
         currentDate={currentDate}
@@ -100,7 +123,7 @@ export function CalendarView({
         onViewModeChange={onViewModeChange}
         isSidebarOpen={isSidebarOpen}
       />
-      <div className="flex-1 min-h-0 overflow-auto hide-scrollbar w-full">
+      <div className="flex-1 min-h-0 overflow-auto w-full thin-scrollbar">
         {viewMode === 'birthday' ? (
           <BirthdayView 
             birthdays={birthdays}
