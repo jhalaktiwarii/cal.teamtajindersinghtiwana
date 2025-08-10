@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { format } from 'date-fns';
 import { useCalendar } from '@/app/hooks/useCalendar';
@@ -116,6 +117,11 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
       updateAppointment(id, {
         ...appointment.appointment,
         status
+      }).then(() => {
+        toast.success(`Appointment status updated to ${status}`);
+      }).catch(error => {
+        console.error('Error updating appointment status:', error);
+        toast.error(`Failed to update appointment status: ${error.message}`);
       });
     }
   };

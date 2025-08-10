@@ -14,6 +14,7 @@ import { toMarathiTime } from '@/app/utils/dateUtils';
 import type { Birthday } from '@/app/types/birthday';
 import { includesCI } from '@/utils/strings';
 import ListView from '../Calendar/ListView';
+import { toast } from 'sonner';
 
 export default function MLAView() {
   const { appointments, loading, updateAppointment } = useAppointments();
@@ -26,8 +27,10 @@ export default function MLAView() {
   const handleStatusChange = async (id: string, newStatus: 'going' | 'not-going' | 'scheduled') => {
     try {
       await updateAppointment(id, { status: newStatus });
+      toast.success(`Appointment status updated to ${newStatus}`);
     } catch (error) {
       console.error('Error updating appointment status:', error);
+      toast.error('Failed to update appointment status.');
     }
   };
 
@@ -39,25 +42,25 @@ export default function MLAView() {
   useEffect(() => {
     async function fetchBirthdays() {
       try {
-        console.log('Fetching birthdays...');
         const res = await fetch('/api/birthdays');
         if (!res.ok) {
           console.error('Failed to fetch birthdays:', res.status, res.statusText);
           throw new Error(`Failed to fetch birthdays: ${res.status} ${res.statusText}`);
         }
         const data = await res.json();
-        console.log('Raw birthday data:', data);
         
         // Filter out any invalid birthday records to prevent crashes
-        const validBirthdays = data.filter((bday: Birthday) => 
-          bday && 
-          bday.id && 
-          bday.fullName && 
-          typeof bday.day === 'number' && 
-          typeof bday.month === 'number' &&
-          bday.day >= 1 && bday.day <= 31 &&
-          bday.month >= 1 && bday.month <= 12
-        );
+        const validBirthdays = data.filter((bday: Birthday) => {
+          const isValid = bday && 
+            bday.id && 
+            bday.fullName && 
+            typeof bday.day === 'number' && 
+            typeof bday.month === 'number' &&
+            bday.day >= 1 && bday.day <= 31 &&
+            bday.month >= 1 && bday.month <= 12;
+          
+          return isValid;
+        });
         
         setBirthdays(validBirthdays);
       } catch (error) {
@@ -108,47 +111,6 @@ export default function MLAView() {
       console.error('Error deleting birthday:', error);
     }
   };
-
-  const handleApproveBirthday = async (id: string) => {
-    try {
-      const birthday = birthdays.find(b => b.id === id);
-      if (birthday) {
-        const updatedBirthday = { ...birthday, status: 'approved' };
-        const res = await fetch(`/api/birthdays/${id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updatedBirthday),
-        });
-        if (res.ok) {
-          const updated = await res.json();
-          setBirthdays(prev => prev.map(b => b.id === updated.id ? updated : b));
-        }
-      }
-    } catch (error) {
-      console.error('Error approving birthday:', error);
-    }
-  };
-
-  const handleDeclineBirthday = async (id: string) => {
-    try {
-      const birthday = birthdays.find(b => b.id === id);
-      if (birthday) {
-        const updatedBirthday = { ...birthday, status: 'declined' };
-        const res = await fetch(`/api/birthdays/${id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updatedBirthday),
-        });
-        if (res.ok) {
-          const updated = await res.json();
-          setBirthdays(prev => prev.map(b => b.id === updated.id ? updated : b));
-        }
-      }
-    } catch (error) {
-      console.error('Error declining birthday:', error);
-    }
-  };
-
 
   interface PDFOptions {
     title: string;
@@ -248,22 +210,6 @@ export default function MLAView() {
              </div>
            </div>
 
-           {/* Filters for Appointments */}
-           {viewMode === 'appointments' && (
-             <div className="flex flex-wrap gap-1 sm:gap-2 mb-4 sm:mb-6 flex-shrink-0">
-               {['all', 'going', 'not-going', 'scheduled'].map((filter) => (
-                 <Button
-                   key={filter}
-                   variant={selectedFilter === filter ? "default" : "outline"}
-                   onClick={() => setSelectedFilter(filter)}
-                   className="text-xs sm:text-sm px-2 sm:px-4 h-8 sm:h-10"
-                 >
-                   {filter.charAt(0).toUpperCase() + filter.slice(1).replace('-', ' ')}
-                 </Button>
-               ))}
-             </div>
-           )}
-
            {/* ListView Component */}
            <div className="flex-1 overflow-hidden">
              <ListView
@@ -272,10 +218,9 @@ export default function MLAView() {
                birthdays={birthdays}
                view={viewMode}
                onStatusChange={handleStatusChange}
-               onApproveBirthday={handleApproveBirthday}
-               onDeclineBirthday={handleDeclineBirthday}
                searchQuery={searchQuery}
                selectedFilter={selectedFilter}
+               onFilterChange={setSelectedFilter}
              />
            </div>
          </div>

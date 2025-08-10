@@ -1,36 +1,19 @@
 import React from "react";
-import { Check, X, Gift, Calendar } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Gift, Calendar } from "lucide-react";
 import type { Birthday } from "@/app/types/birthday";
 
 interface BirthdayCardProps {
   item: Birthday;
   role: "staff" | "mla";
-  onApprove?: (id: string) => void;
-  onDecline?: (id: string) => void;
 }
 
-export function BirthdayCard({ item, role, onApprove, onDecline }: BirthdayCardProps) {
+export function BirthdayCard({ item, role }: BirthdayCardProps) {
   const getDateLabel = (day: number, month: number) => {
     const months = [
       'January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
     return `${months[month - 1]} ${day}`;
-  };
-
-  const getStatusColor = (status?: string) => {
-    switch (status) {
-      case 'approved':
-        return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-      case 'declined':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
   };
 
   return (
@@ -58,38 +41,9 @@ export function BirthdayCard({ item, role, onApprove, onDecline }: BirthdayCardP
               Contact: {item.phone}
             </div>
           )}
-        </div>
-
-        <div className="flex items-center gap-1 xs:gap-2">
-          {/* Status chip */}
-          <span className={cn(
-            "inline-flex items-center px-1.5 xs:px-2 py-0.5 xs:py-1 rounded-full text-xs font-medium whitespace-nowrap border",
-            getStatusColor(item.status)
-          )}>
-            {(item.status ?? 'Pending').charAt(0).toUpperCase() + 
-             (item.status ?? 'pending').slice(1)}
-          </span>
-
-           {role === "mla" && (
-            <div className="flex items-center gap-1">
-              <Button 
-                size="sm" 
-                variant="ghost" 
-                onClick={() => onApprove?.(item.id)}
-                className="h-6 w-6 xs:h-8 xs:w-8 p-0 hover:bg-emerald-100"
-                title="Approve"
-              >
-                <Check className="h-3 w-3 xs:h-4 xs:w-4 text-emerald-600" />
-              </Button>
-              <Button 
-                size="sm" 
-                variant="ghost" 
-                onClick={() => onDecline?.(item.id)}
-                className="h-6 w-6 xs:h-8 xs:w-8 p-0 hover:bg-red-100"
-                title="Decline"
-              >
-                <X className="h-3 w-3 xs:h-4 xs:w-4 text-red-600" />
-              </Button>
+          {item.ward && (
+            <div className="mt-1 text-xs text-gray-500">
+              Ward: {item.ward}
             </div>
           )}
         </div>

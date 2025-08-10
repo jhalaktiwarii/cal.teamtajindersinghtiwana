@@ -137,6 +137,55 @@ export function AppointmentCard({ item, role, onStatusChange }: AppointmentCardP
               )}
             </div>
           )}
+
+          {role === "mla" && (
+            <div className="flex items-center gap-1">
+              {appointment?.status === 'scheduled' && (
+                <>
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    onClick={() => appointment?.id && onStatusChange(appointment.id, 'going')}
+                    className="h-5 w-5 xs:h-6 xs:w-6 p-0 hover:bg-emerald-100"
+                    title="Approve"
+                  >
+                    <CheckCircle2 className="h-3 w-3 xs:h-4 xs:w-4 text-emerald-600" />
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    onClick={() => appointment?.id && onStatusChange(appointment.id, 'not-going')}
+                    className="h-5 w-5 xs:h-6 xs:w-6 p-0 hover:bg-red-100"
+                    title="Decline"
+                  >
+                    <XCircle className="h-3 w-3 xs:h-4 xs:w-4 text-red-600" />
+                  </Button>
+                </>
+              )}
+              {appointment?.status === 'going' && (
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  onClick={() => appointment?.id && onStatusChange(appointment.id, 'not-going')}
+                  className="h-5 w-5 xs:h-6 xs:w-6 p-0 hover:bg-red-100"
+                  title="Decline"
+                >
+                  <XCircle className="h-3 w-3 xs:h-4 xs:w-4 text-red-600" />
+                </Button>
+              )}
+              {appointment?.status === 'not-going' && (
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  onClick={() => appointment?.id && onStatusChange(appointment.id, 'going')}
+                  className="h-5 w-5 xs:h-6 xs:w-6 p-0 hover:bg-emerald-100"
+                  title="Approve"
+                >
+                  <CheckCircle2 className="h-3 w-3 xs:h-4 xs:w-4 text-emerald-600" />
+                </Button>
+              )}
+            </div>
+          )}
           
           {/* Status chip */}
           <span className={cn(

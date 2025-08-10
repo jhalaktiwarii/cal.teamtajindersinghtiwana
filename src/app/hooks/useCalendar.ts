@@ -55,6 +55,7 @@ export function useCalendar() {
 
   return {
     currentDate,
+    setCurrentDate,
     viewMode,
     setViewMode,
     nextPeriod,

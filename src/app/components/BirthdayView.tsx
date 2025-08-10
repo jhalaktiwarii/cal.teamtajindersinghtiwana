@@ -13,16 +13,13 @@ interface BirthdayViewProps {
   onDelete: (id: string) => void;
 }
 
-// Helper function to get next birthday occurrence
-const getNextBirthday = (day: number, month: number): Date => {
+  const getNextBirthday = (day: number, month: number): Date => {
   const today = new Date();
   const currentYear = today.getFullYear();
   
-  // Create birthday for current year
-  let nextBirthday = new Date(currentYear, month - 1, day);
+   let nextBirthday = new Date(currentYear, month - 1, day);
   
-  // If birthday has passed this year, set it for next year
-  if (nextBirthday < today) {
+   if (nextBirthday < today) {
     nextBirthday = new Date(currentYear + 1, month - 1, day);
   }
   
@@ -82,6 +79,7 @@ export function BirthdayView({ birthdays, onSave, onDelete }: BirthdayViewProps)
           </Button>
         </div>
       </div>
+
       <div className="mb-4 flex flex-col xs:flex-row gap-2 items-start xs:items-center">
         <input
           type="text"
