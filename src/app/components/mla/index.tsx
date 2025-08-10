@@ -18,6 +18,7 @@ import { CalendarEvent } from '@/app/types';
 import { toMarathiTime } from '@/app/utils/dateUtils';
 import { BirthdayView } from '../BirthdayView';
 import type { Birthday } from '@/app/types/birthday';
+import { includesCI } from '@/utils/strings';
 
 export default function MLAView() {
   const { appointments, loading, updateAppointment } = useAppointments();
@@ -72,8 +73,8 @@ export default function MLAView() {
     const matchesFilter = selectedFilter === 'all' || 
       apt.appointment.status === selectedFilter;
     
-    const matchesSearch = apt.appointment.programName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      apt.appointment.contactNo.includes(searchQuery);
+    const matchesSearch = includesCI(apt.appointment.programName, searchQuery) ||
+      includesCI(apt.appointment.contactNo, searchQuery);
     
     const appointmentDate = new Date(apt.appointment.startTime);
     const matchesDate = appointmentDate.toDateString() === selectedDate.toDateString();
@@ -127,7 +128,8 @@ export default function MLAView() {
           body: JSON.stringify(bday),
         });
         if (res.ok) {
-          setBirthdays(prev => prev.map(b => b.id === bday.id ? bday : b));
+          const updated = await res.json();
+          setBirthdays(prev => prev.map(b => b.id === updated.id ? updated : b));
         }
       } else {
         // Create new birthday
@@ -138,7 +140,7 @@ export default function MLAView() {
         });
         if (res.ok) {
           const newBirthday = await res.json();
-          setBirthdays(prev => [...prev, newBirthday]);
+          setBirthdays(prev => [newBirthday, ...prev]);
         }
       }
     } catch (error) {

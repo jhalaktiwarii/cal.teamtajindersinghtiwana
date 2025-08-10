@@ -5,6 +5,7 @@ import { BirthdayList } from './Sidebar/BirthdayList';
 import BirthdayModal from '../../components/BirthdayModal';
 import ExcelImportModal from './ExcelImportModal';
 import type { Birthday } from '@/app/types/birthday';
+import { includesCI } from '@/utils/strings';
 
 interface BirthdayViewProps {
   birthdays: Birthday[];
@@ -36,11 +37,10 @@ export function BirthdayView({ birthdays, onSave, onDelete }: BirthdayViewProps)
 
   const filtered = useMemo(() => {
     if (!search) return birthdays;
-    const s = search.toLowerCase();
     return birthdays.filter(b =>
-      b.fullName.toLowerCase().includes(s) ||
-      (b.phone && b.phone.includes(s)) ||
-      (b.ward && b.ward.toLowerCase().includes(s))
+      includesCI(b?.fullName, search) ||
+      includesCI(b?.phone, search) ||
+      includesCI(b?.ward, search)
     );
   }, [birthdays, search]);
 
@@ -54,8 +54,8 @@ export function BirthdayView({ birthdays, onSave, onDelete }: BirthdayViewProps)
   }, [filtered]);
 
   const handleImportComplete = () => {
-    // Refresh the birthdays list
-    window.location.reload();
+    // The birthdays will be updated through the parent component's state
+    // No need to reload the page
   };
 
   return (

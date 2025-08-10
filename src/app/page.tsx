@@ -24,7 +24,7 @@ function AppContent() {
       {isMLA ? <MLAView /> : <PAView appointments={appointments} saveAppointment={saveAppointment} updateAppointment={updateAppointment} deleteAppointment={deleteAppointment} />}
       {/* Floating Create Button */}
       <button
-        className="fixed bottom-8 right-8 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
+        className="fixed bottom-8 right-8 z-[70] w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
         onClick={() => setShowCreate(true)}
         aria-label="Create Event"
       >

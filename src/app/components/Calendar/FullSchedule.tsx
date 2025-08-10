@@ -14,6 +14,7 @@ import { toast } from 'sonner'
 import { ShareDialog } from '@/app/components/ShareDialog'
 import { format } from 'date-fns'
 import { RainbowButton } from '@/components/ui/rainbow-button'
+import { lower } from '@/utils/strings'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -144,7 +145,7 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
         )
       )
       
-      toast.success(`Appointment ${newStatus.toLowerCase()} successfully`)
+              toast.success(`Appointment ${lower(newStatus)} successfully`)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to update status')
     } finally {
@@ -251,7 +252,7 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
 
 
   return (
-    <div className="fixed inset-0 bg-background z-50 overflow-hidden flex flex-col w-full max-w-full">
+    <div className="fixed inset-0 bg-background z-[60] overflow-hidden flex flex-col w-full max-w-full">
       {/* Hidden PDF content for html2pdf.js */}
       {showPdfContent && (
         <div
@@ -432,8 +433,8 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
                             )}
                             <Badge 
                               variant="secondary" 
-                              className={event.appointment.status.toLowerCase() === 'scheduled' ? 'bg-green-500/15 text-green-700' 
-                                : event.appointment.status.toLowerCase() === 'going' ? 'bg-blue-500/15 text-blue-700'
+                                              className={lower(event.appointment.status) === 'scheduled' ? 'bg-green-500/15 text-green-700'
+                  : lower(event.appointment.status) === 'going' ? 'bg-blue-500/15 text-blue-700'
                                 : 'bg-red-500/15 text-red-700'}
                             >
                               {event.appointment.status}

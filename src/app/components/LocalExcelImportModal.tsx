@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Upload, FileSpreadsheet, AlertCircle, CheckCircle, Loader2, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
+import { includesCI } from '@/utils/strings';
 import type { Birthday } from '@/app/types/birthday';
 
 interface LocalExcelImportModalProps {
@@ -142,7 +143,7 @@ export default function LocalExcelImportModal({ open, onClose, onImportComplete 
           const requiredHeaders = ['Full Name', 'Day', 'Month'];
           
           const missingHeaders = requiredHeaders.filter(header => 
-            !headers.some(h => h?.toString().toLowerCase().includes(header.toLowerCase()))
+            !headers.some(h => includesCI(h?.toString(), header))
           );
 
           if (missingHeaders.length > 0) {
@@ -160,13 +161,13 @@ export default function LocalExcelImportModal({ open, onClose, onImportComplete 
           };
 
           // Find column indices
-          const nameIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('full name'));
-          const addressIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('address'));
-          const phoneIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('phone'));
-          const wardIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('ward'));
-          const dayIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('day'));
-          const monthIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('month'));
-          const yearIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('year'));
+          const nameIndex = headers.findIndex(h => includesCI(h?.toString(), 'full name'));
+          const addressIndex = headers.findIndex(h => includesCI(h?.toString(), 'address'));
+          const phoneIndex = headers.findIndex(h => includesCI(h?.toString(), 'phone'));
+          const wardIndex = headers.findIndex(h => includesCI(h?.toString(), 'ward'));
+          const dayIndex = headers.findIndex(h => includesCI(h?.toString(), 'day'));
+          const monthIndex = headers.findIndex(h => includesCI(h?.toString(), 'month'));
+          const yearIndex = headers.findIndex(h => includesCI(h?.toString(), 'year'));
 
           // Process each row (skip header)
           for (let i = 1; i < jsonData.length; i++) {
@@ -320,7 +321,7 @@ export default function LocalExcelImportModal({ open, onClose, onImportComplete 
           const requiredHeaders = ['Full Name', 'Day', 'Month'];
           
           const missingHeaders = requiredHeaders.filter(header => 
-            !headers.some(h => h?.toString().toLowerCase().includes(header.toLowerCase()))
+            !headers.some(h => includesCI(h?.toString(), header))
           );
 
           if (missingHeaders.length > 0) {
@@ -338,13 +339,13 @@ export default function LocalExcelImportModal({ open, onClose, onImportComplete 
           };
 
           // Find column indices
-          const nameIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('full name'));
-          const addressIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('address'));
-          const phoneIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('phone'));
-          const wardIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('ward'));
-          const dayIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('day'));
-          const monthIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('month'));
-          const yearIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('year'));
+          const nameIndex = headers.findIndex(h => includesCI(h?.toString(), 'full name'));
+          const addressIndex = headers.findIndex(h => includesCI(h?.toString(), 'address'));
+          const phoneIndex = headers.findIndex(h => includesCI(h?.toString(), 'phone'));
+          const wardIndex = headers.findIndex(h => includesCI(h?.toString(), 'ward'));
+          const dayIndex = headers.findIndex(h => includesCI(h?.toString(), 'day'));
+          const monthIndex = headers.findIndex(h => includesCI(h?.toString(), 'month'));
+          const yearIndex = headers.findIndex(h => includesCI(h?.toString(), 'year'));
 
           // Process each row (skip header)
           for (let i = 1; i < jsonData.length; i++) {
@@ -449,7 +450,7 @@ export default function LocalExcelImportModal({ open, onClose, onImportComplete 
 
               // Check for duplicates in the current import batch
               const isDuplicate = result.birthdays.some(existing => 
-                existing.fullName.toLowerCase() === fullName.toLowerCase() && 
+                lower(existing.fullName) === lower(fullName) && 
                 existing.day === day && 
                 existing.month === month && 
                 existing.year === year
@@ -458,7 +459,7 @@ export default function LocalExcelImportModal({ open, onClose, onImportComplete 
               if (isDuplicate) {
                 // Replace the existing entry with the new one
                 const existingIndex = result.birthdays.findIndex(existing => 
-                  existing.fullName.toLowerCase() === fullName.toLowerCase() && 
+                  lower(existing.fullName) === lower(fullName) && 
                   existing.day === day && 
                   existing.month === month && 
                   existing.year === year

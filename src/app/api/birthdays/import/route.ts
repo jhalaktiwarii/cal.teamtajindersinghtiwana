@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/auth";
 import { createBirthday } from "@/lib/schema/birthdays";
 import * as XLSX from 'xlsx';
+import { includesCI } from '@/utils/strings';
 
 interface ImportResult {
   success: number;
@@ -47,13 +48,13 @@ function validateBirthdayRow(row: string[], headers: string[], rowNumber: number
   error?: string; 
 } {
   // Find column indices
-  const nameIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('full name'));
-  const addressIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('address'));
-  const phoneIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('phone'));
-  const wardIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('ward'));
-  const dayIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('day'));
-  const monthIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('month'));
-  const yearIndex = headers.findIndex(h => h?.toString().toLowerCase().includes('year'));
+  const nameIndex = headers.findIndex(h => includesCI(h?.toString(), 'full name'));
+  const addressIndex = headers.findIndex(h => includesCI(h?.toString(), 'address'));
+  const phoneIndex = headers.findIndex(h => includesCI(h?.toString(), 'phone'));
+  const wardIndex = headers.findIndex(h => includesCI(h?.toString(), 'ward'));
+  const dayIndex = headers.findIndex(h => includesCI(h?.toString(), 'day'));
+  const monthIndex = headers.findIndex(h => includesCI(h?.toString(), 'month'));
+  const yearIndex = headers.findIndex(h => includesCI(h?.toString(), 'year'));
 
   // Extract data with proper null/undefined handling
   const fullName = row[nameIndex]?.toString()?.trim() || '';
@@ -208,7 +209,7 @@ export async function POST(request: NextRequest) {
     const requiredHeaders = ['Full Name', 'Day', 'Month'];
     
     const missingHeaders = requiredHeaders.filter(header => 
-      !headers.some(h => h?.toString().toLowerCase().includes(header.toLowerCase()))
+      !headers.some(h => includesCI(h?.toString(), header))
     );
 
     if (missingHeaders.length > 0) {

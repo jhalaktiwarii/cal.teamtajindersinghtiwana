@@ -106,8 +106,17 @@ export function DayView({ events, currentDate, onEventClick, onDayDoubleClick, o
             <div
               key={hour}
               className={`flex border-b border-gray-100 dark:border-gray-800 min-h-[56px] group relative`}
-              onDoubleClick={() => handleTimeSlotDoubleClick(`${hour.toString().padStart(2, '0')}:00`)}
-              onClick={() => handleAddAppointment(`${hour.toString().padStart(2, '0')}:00`, currentDate)}
+              onClick={(e) => {
+                // Check if click originated from an event button
+                const target = e.target as HTMLElement;
+                const eventEl = target.closest<HTMLElement>("[data-event-id]");
+                if (eventEl) {
+                  // Event click is handled by the button itself
+                  return;
+                }
+                // Otherwise, treat as time slot click
+                handleAddAppointment(`${hour.toString().padStart(2, '0')}:00`, currentDate);
+              }}
             >
               <div className="w-16 py-4 text-right pr-4 text-sm text-gray-400 select-none">
                 {formatHour(hour)}
@@ -118,8 +127,14 @@ export function DayView({ events, currentDate, onEventClick, onDayDoubleClick, o
                   return (
                     <button
                       key={event.appointment.id}
-                      onClick={() => onEventClick(event)}
-                      className="absolute left-2 right-2 p-2 rounded-lg bg-blue-50 dark:bg-blue-900/50 hover:bg-blue-100 dark:hover:bg-blue-900/70 transition-colors shadow-sm border border-blue-100 dark:border-blue-800 min-h-[40px]"
+                      data-event-id={event.appointment.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEventClick(event);
+                      }}
+                      aria-haspopup="dialog"
+                      aria-label={`Open ${event.appointment.eventFrom || event.appointment.programName || 'appointment'}`}
+                      className="absolute left-2 right-2 p-2 rounded-lg bg-blue-50 dark:bg-blue-900/50 hover:bg-blue-100 dark:hover:bg-blue-900/70 transition-colors shadow-sm border border-blue-100 dark:border-blue-800 min-h-[40px] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                       style={style}
                     >
                       <div className="flex flex-col h-full justify-center">

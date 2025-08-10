@@ -7,6 +7,7 @@ import LocalExcelImportModal from './LocalExcelImportModal';
 import { useLocalBirthdays } from '../hooks/useLocalBirthdays';
 import type { Birthday } from '@/app/types/birthday';
 import { toast } from 'sonner';
+import { includesCI } from '@/utils/strings';
 
 export function LocalBirthdayView() {
   const {
@@ -27,11 +28,10 @@ export function LocalBirthdayView() {
 
   const filtered = useMemo(() => {
     if (!search) return birthdays;
-    const s = search.toLowerCase();
     return birthdays.filter(b =>
-      b.fullName.toLowerCase().includes(s) ||
-      (b.phone && b.phone.includes(s)) ||
-      (b.ward && b.ward.toLowerCase().includes(s))
+      includesCI(b?.fullName, search) ||
+      includesCI(b?.phone, search) ||
+      includesCI(b?.ward, search)
     );
   }, [birthdays, search]);
 

@@ -107,6 +107,8 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
     fetchBirthdays();
   }, []);
 
+
+
  
   const handleStatusChange = (id: string, status: 'scheduled' | 'going' | 'not-going' ) => {
     const appointment = appointments.find(apt => apt.appointment.id === id);
@@ -245,7 +247,6 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
   // Birthday handlers
   const handleSaveBirthday = async (bday: Birthday) => {
     try {
-      let updatedList: Birthday[] = [];
       if (bday.id) {
         // Update existing
         const res = await fetch(`/api/birthdays/${bday.id}`, {
@@ -255,8 +256,7 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
         });
         if (res.ok) {
           const updated = await res.json();
-          updatedList = birthdays.map(b => b.id === updated.id ? updated : b);
-          setBirthdays(updatedList);
+          setBirthdays(prev => prev.map(b => b.id === updated.id ? updated : b));
         }
       } else {
         // Create new
@@ -267,8 +267,7 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
         });
         if (res.ok) {
           const created = await res.json();
-          updatedList = [created, ...birthdays];
-          setBirthdays(updatedList);
+          setBirthdays(prev => [created, ...prev]);
         }
       }
     } catch (error) {
@@ -312,7 +311,7 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
       
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white dark:bg-gray-800 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+        className="fixed top-4 left-4 z-[70] p-2 rounded-lg bg-white dark:bg-gray-800 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700"
         aria-label="Toggle Sidebar"
       >
         {isSidebarOpen ? (
@@ -322,44 +321,46 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
         )}
       </button>
 
-      <div 
-        className={`fixed inset-y-0 left-0 z-50 w-80 transform transition-transform duration-300 ease-in-out bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        {(() => {
-          try {
-            return (
-              <Sidebar
-                appointments={appointments}
-                onStatusChange={handleStatusChange}
-                onUrgencyChange={handleUrgencyChange}
-                isDarkMode={false}
-                setIsSidebarOpen={setIsSidebarOpen}
-                birthdays={birthdays}
-                onEditBirthday={handleSaveBirthday}
-                onDeleteBirthday={handleDeleteBirthday}
-              />
-            );
-          } catch (error) {
-            console.error('Error rendering Sidebar:', error);
-            return (
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-red-800 mb-2">Sidebar Error</h3>
-                <p className="text-red-600 mb-4">Failed to load sidebar</p>
-                <button 
-                  onClick={() => window.location.reload()}
-                  className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-                >
-                  Reload Page
-                </button>
-              </div>
-            );
-          }
-        })()}
-      </div>
+       {!showFullSchedule && (
+        <div 
+          className={`fixed inset-y-0 left-0 z-40 w-80 transform transition-transform duration-300 ease-in-out bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 ${
+            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
+          {(() => {
+            try {
+              return (
+                <Sidebar
+                  appointments={appointments}
+                  onStatusChange={handleStatusChange}
+                  onUrgencyChange={handleUrgencyChange}
+                  isDarkMode={false}
+                  setIsSidebarOpen={setIsSidebarOpen}
+                  birthdays={birthdays}
+                  onEditBirthday={handleSaveBirthday}
+                  onDeleteBirthday={handleDeleteBirthday}
+                />
+              );
+            } catch (error) {
+              console.error('Error rendering Sidebar:', error);
+              return (
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold text-red-800 mb-2">Sidebar Error</h3>
+                  <p className="text-red-600 mb-4">Failed to load sidebar</p>
+                  <button 
+                    onClick={() => window.location.reload()}
+                    className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                  >
+                    Reload Page
+                  </button>
+                </div>
+              );
+            }
+          })()}
+        </div>
+      )}
 
-        <main className={`flex-1 transition-all duration-300 overflow-hidden z-10 ${isSidebarOpen ? 'ml-80' : 'ml-0'}`}>
+        <main className={`flex-1 transition-all duration-300 overflow-hidden z-10 ${(isSidebarOpen && !showFullSchedule) ? 'ml-80' : 'ml-0'}`}>
           <div className="h-full p-1 xs:p-2 sm:p-3 md:p-4 overflow-auto thin-scrollbar">
             {(() => {
               try {

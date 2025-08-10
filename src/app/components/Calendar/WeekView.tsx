@@ -9,6 +9,7 @@ interface WeekViewProps {
   onEventClick: (event: CalendarEvent) => void;
   onDayDoubleClick: (date: Date, time?: string) => void;
   onAddAppointment?: (date: Date, time?: string) => void;
+  onDayClick?: (date: Date) => void;
 }
 
 const eventColors = [
@@ -22,7 +23,8 @@ export function WeekView({
   currentDate, 
   onEventClick, 
   onDayDoubleClick,
-  onAddAppointment 
+  onAddAppointment,
+  onDayClick
 }: WeekViewProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showSchedule, setShowSchedule] = useState(false);
@@ -122,7 +124,18 @@ export function WeekView({
                 {hours.map((hour) => (
                   <div
                     key={`cell-${hour}-${date.getTime()}`}
-                    className="h-12 border-b border-gray-200"
+                    className="h-12 border-b border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={(e) => {
+                      // Check if click originated from an event button
+                      const target = e.target as HTMLElement;
+                      const eventEl = target.closest<HTMLElement>("[data-event-id]");
+                      if (eventEl) {
+                        // Event click is handled by the button itself
+                        return;
+                      }
+                      // Otherwise, treat as day/time click
+                      onDayClick?.(date);
+                    }}
                     onDoubleClick={() => handleDayDoubleClick(date, hour)}
                   />
                 ))}
@@ -138,9 +151,13 @@ export function WeekView({
                     const top = (startHour / 24) * (hours.length * 48);
                     const height = 48; // Fixed height for events
                     return (
-                      <div
+                      <button
                         key={event.appointment.id}
-                        className={`absolute left-1 right-1 rounded-lg shadow-md px-3 py-1 flex flex-col justify-center ${eventColors[i % eventColors.length]} text-white cursor-pointer transition-all`}
+                        type="button"
+                        data-event-id={event.appointment.id}
+                        aria-haspopup="dialog"
+                        aria-label={`Open ${event.appointment.programName || event.appointment.eventFrom || 'appointment'} at ${startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}`}
+                        className={`absolute left-1 right-1 rounded-lg shadow-md px-3 py-1 flex flex-col justify-center ${eventColors[i % eventColors.length]} text-white cursor-pointer transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1`}
                         style={{
                           top: `${top}px`,
                           height: `${height}px`,
@@ -157,7 +174,7 @@ export function WeekView({
                         <div className="text-[11px] mt-0.5 opacity-90 whitespace-nowrap">
                           {startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
                         </div>
-                      </div>
+                      </button>
                     );
                   })}
               </div>

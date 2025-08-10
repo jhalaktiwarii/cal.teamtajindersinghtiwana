@@ -137,6 +137,7 @@ export function CalendarView({
             onDayDoubleClick={onDayDoubleClick}
             onDayClick={onDateChange}
             onAddAppointment={onAddAppointment}
+            onEventClick={onEventClick}
           />
         ) : viewMode === 'week' ? (
           <WeekView
@@ -145,6 +146,7 @@ export function CalendarView({
             onEventClick={onEventClick}
             onDayDoubleClick={onDayDoubleClick}
             onAddAppointment={onAddAppointment}
+            onDayClick={onDateChange}
           />
         ) : viewMode === 'day' ? (
           <DayView

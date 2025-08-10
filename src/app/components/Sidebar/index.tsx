@@ -12,6 +12,7 @@ import { format, isToday, isTomorrow, isAfter, isBefore, startOfDay, isEqual, ad
 import { cn } from "@/lib/utils";
 import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
+import { includesCI } from '@/utils/strings';
 
 import {
   DropdownMenu,
@@ -141,12 +142,11 @@ export function Sidebar({
       
       // Search query filter
       if (searchQuery) {
-        const searchLower = searchQuery.toLowerCase();
         const matchesSearch = 
-          event.appointment.programName.toLowerCase().includes(searchLower) ||
-          event.appointment.address.toLowerCase().includes(searchLower) ||
-          event.appointment.notes?.toLowerCase().includes(searchLower) ||
-          event.appointment.eventFrom.toLowerCase().includes(searchLower);
+          includesCI(event.appointment.programName, searchQuery) ||
+          includesCI(event.appointment.address, searchQuery) ||
+          includesCI(event.appointment.notes, searchQuery) ||
+          includesCI(event.appointment.eventFrom, searchQuery);
         
         if (!matchesSearch) return false;
       }
