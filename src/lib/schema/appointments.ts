@@ -1,7 +1,7 @@
 import { CreateTableCommand, DynamoDBClient, ListTablesCommand, DescribeTableCommand } from "@aws-sdk/client-dynamodb";
 import { DeleteCommand, GetCommand, PutCommand,  UpdateCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { dynamoDb } from "../dynamodb";
-import { getTableName, getTableConfig } from "./constants";
+import { getTableName } from "./constants";
 
 let tableInitialized = false;
 

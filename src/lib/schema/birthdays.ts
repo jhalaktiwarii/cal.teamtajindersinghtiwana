@@ -2,7 +2,7 @@ import { CreateTableCommand, DynamoDBClient, ListTablesCommand, DescribeTableCom
 import { DeleteCommand, GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { dynamoDb } from "../dynamodb";
 import type { Birthday } from "@/app/types/birthday";
-import { getTableName, getTableConfig } from "./constants";
+import { getTableName } from "./constants";
 
 let tableInitialized = false;
 
