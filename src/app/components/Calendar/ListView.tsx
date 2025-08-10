@@ -18,6 +18,7 @@ interface ListViewProps {
   searchQuery?: string;
   selectedFilter?: string;
   onFilterChange?: (filter: string) => void;
+  onDeleteBirthday?: (id: string) => void;
 }
 
 export default function ListView({ 
@@ -28,7 +29,8 @@ export default function ListView({
   onStatusChange,
   searchQuery = "",
   selectedFilter = "all",
-  onFilterChange
+  onFilterChange,
+  onDeleteBirthday
 }: ListViewProps) {
   const pager = useDatePager(new Date());
 

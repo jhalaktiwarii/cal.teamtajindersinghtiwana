@@ -15,6 +15,7 @@ import type { Birthday } from '@/app/types/birthday';
 import { includesCI } from '@/utils/strings';
 import ListView from '../Calendar/ListView';
 import { toast } from 'sonner';
+import { DeleteModal } from '@/components/modals/DeleteModal';
 
 export default function MLAView() {
   const { appointments, loading, updateAppointment } = useAppointments();
@@ -23,6 +24,13 @@ export default function MLAView() {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'appointments' | 'birthdays'>('appointments');
   const [birthdays, setBirthdays] = useState<Birthday[]>([]);
+  
+  // Delete modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteModalLoading, setDeleteModalLoading] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [deleteModalTitle, setDeleteModalTitle] = useState('');
+  const [deleteModalDescription, setDeleteModalDescription] = useState('');
 
   const handleStatusChange = async (id: string, newStatus: 'going' | 'not-going' | 'scheduled') => {
     try {
@@ -112,6 +120,33 @@ export default function MLAView() {
     }
   };
 
+  const openDeleteBirthdayModal = (id: string, name: string) => {
+    setItemToDelete(id);
+    setDeleteModalTitle("Delete Birthday?");
+    setDeleteModalDescription(`Are you sure you want to delete "${name}"'s birthday? This action cannot be undone.`);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete) return;
+    
+    setDeleteModalLoading(true);
+    try {
+      const res = await fetch(`/api/birthdays/${itemToDelete}`, { method: 'DELETE' });
+      if (res.ok) {
+        setBirthdays(prev => prev.filter(b => b.id !== itemToDelete));
+        toast.success('Birthday deleted successfully');
+        setDeleteModalOpen(false);
+      } else {
+        throw new Error('Failed to delete birthday');
+      }
+    } catch (error) {
+      toast.error('Failed to delete birthday');
+    } finally {
+      setDeleteModalLoading(false);
+    }
+  };
+
   interface PDFOptions {
     title: string;
     subtitle: string;
@@ -143,7 +178,7 @@ export default function MLAView() {
        <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-10 flex-shrink-0">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 py-2 sm:py-3">
           <div className="flex items-center justify-between gap-2 sm:gap-4">
-            <span className="md:inline text-blue-600 dark:text-blue-400 font-semibold">My Calender App</span>
+            <span className="md:inline text-blue-600 dark:text-blue-400 font-semibold">Team Tajinder Singh Tiwana</span>
             <div className="relative flex-1 hidden sm:block">
               <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 h-4 sm:h-5 w-4 sm:w-5 text-gray-400" />
               <Input 
@@ -221,6 +256,12 @@ export default function MLAView() {
                searchQuery={searchQuery}
                selectedFilter={selectedFilter}
                onFilterChange={setSelectedFilter}
+               onDeleteBirthday={(id) => {
+                 const birthday = birthdays.find(b => b.id === id);
+                 if (birthday) {
+                   openDeleteBirthdayModal(id, birthday.fullName);
+                 }
+               }}
              />
            </div>
          </div>
@@ -255,6 +296,17 @@ export default function MLAView() {
         isOpen={isShareDialogOpen}
         onOpenChange={setIsShareDialogOpen}
         events={appointments}
+      />
+
+      <DeleteModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title={deleteModalTitle}
+        description={deleteModalDescription}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        loading={deleteModalLoading}
       />
     </div>
   );

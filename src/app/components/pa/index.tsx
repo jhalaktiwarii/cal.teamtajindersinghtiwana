@@ -12,6 +12,7 @@ import { FullPageSchedule } from '../Calendar/FullSchedule';
 import { AppointmentDetails } from '../AppointmentDetails';
 import { AppointmentModal } from '../AppointmentModal';
 import type { Birthday } from '@/app/types/birthday';
+import { DeleteModal } from '@/components/modals/DeleteModal';
 
 interface PAViewProps {
   appointments: CalendarEvent[];
@@ -39,6 +40,14 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [birthdays, setBirthdays] = useState<Birthday[]>([]);
   const [error, setError] = useState<string | null>(null);
+  
+  // Delete modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteModalLoading, setDeleteModalLoading] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [deleteModalTitle, setDeleteModalTitle] = useState('');
+  const [deleteModalDescription, setDeleteModalDescription] = useState('');
+  const [deleteType, setDeleteType] = useState<'appointment' | 'birthday'>('appointment');
 
   // Error boundary effect
   useEffect(() => {
@@ -245,8 +254,11 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
 
   const handleDeleteAppointment = () => {
     if (selectedEvent) {
-      deleteAppointment(selectedEvent.appointment.id);
-      setSelectedEvent(null);
+      setItemToDelete(selectedEvent.appointment.id);
+      setDeleteModalTitle("Delete Appointment?");
+      setDeleteModalDescription(`Are you sure you want to delete "${selectedEvent.appointment.programName}"? This action cannot be undone.`);
+      setDeleteType('appointment');
+      setDeleteModalOpen(true);
     }
   };
 
@@ -289,6 +301,40 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
       }
     } catch (error) {
       console.error('Error deleting birthday:', error);
+    }
+  };
+
+  const openDeleteBirthdayModal = (id: string, name: string) => {
+    setItemToDelete(id);
+    setDeleteModalTitle("Delete Birthday?");
+    setDeleteModalDescription(`Are you sure you want to delete "${name}"'s birthday? This action cannot be undone.`);
+    setDeleteType('birthday');
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete) return;
+    
+    setDeleteModalLoading(true);
+    try {
+      if (deleteType === 'appointment') {
+        await deleteAppointment(itemToDelete);
+        setSelectedEvent(null);
+        toast.success('Appointment deleted successfully');
+      } else {
+        const res = await fetch(`/api/birthdays/${itemToDelete}`, { method: 'DELETE' });
+        if (res.ok) {
+          setBirthdays(prev => prev.filter(b => b.id !== itemToDelete));
+          toast.success('Birthday deleted successfully');
+        } else {
+          throw new Error('Failed to delete birthday');
+        }
+      }
+      setDeleteModalOpen(false);
+    } catch (error) {
+      toast.error('Failed to delete item');
+    } finally {
+      setDeleteModalLoading(false);
     }
   };
 
@@ -344,7 +390,12 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
                   setIsSidebarOpen={setIsSidebarOpen}
                   birthdays={birthdays}
                   onEditBirthday={handleSaveBirthday}
-                  onDeleteBirthday={handleDeleteBirthday}
+                  onDeleteBirthday={(id) => {
+                    const birthday = birthdays.find(b => b.id === id);
+                    if (birthday) {
+                      openDeleteBirthdayModal(id, birthday.fullName);
+                    }
+                  }}
                 />
               );
             } catch (error) {
@@ -387,7 +438,12 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
                     }}
                     birthdays={birthdays}
                     onSaveBirthday={handleSaveBirthday}
-                    onDeleteBirthday={handleDeleteBirthday}
+                    onDeleteBirthday={(id) => {
+                      const birthday = birthdays.find(b => b.id === id);
+                      if (birthday) {
+                        openDeleteBirthdayModal(id, birthday.fullName);
+                      }
+                    }}
                     isSidebarOpen={isSidebarOpen}
                   />
                 );
@@ -449,6 +505,17 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
           appointment={selectedEvent?.appointment}
         />
       )}
+
+      <DeleteModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title={deleteModalTitle}
+        description={deleteModalDescription}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        loading={deleteModalLoading}
+      />
     </div>
   );
 }

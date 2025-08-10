@@ -8,6 +8,7 @@ import { useLocalBirthdays } from '../hooks/useLocalBirthdays';
 import type { Birthday } from '@/app/types/birthday';
 import { toast } from 'sonner';
 import { includesCI } from '@/utils/strings';
+import { DeleteModal } from '@/components/modals/DeleteModal';
 
 export function LocalBirthdayView() {
   const {
@@ -25,6 +26,13 @@ export function LocalBirthdayView() {
   const [modalOpen, setModalOpen] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [editBirthday, setEditBirthday] = useState<Birthday | undefined>(undefined);
+  
+  // Delete modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteModalLoading, setDeleteModalLoading] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [deleteModalTitle, setDeleteModalTitle] = useState('');
+  const [deleteModalDescription, setDeleteModalDescription] = useState('');
 
   const filtered = useMemo(() => {
     if (!search) return birthdays;
@@ -85,6 +93,28 @@ export function LocalBirthdayView() {
       toast.success('Birthday deleted successfully');
     } catch {
       toast.error('Failed to delete birthday');
+    }
+  };
+
+  const openDeleteModal = (id: string, name: string) => {
+    setItemToDelete(id);
+    setDeleteModalTitle("Delete Birthday?");
+    setDeleteModalDescription(`Are you sure you want to delete "${name}"'s birthday? This action cannot be undone.`);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete) return;
+    
+    setDeleteModalLoading(true);
+    try {
+      await deleteBirthday(itemToDelete);
+      toast.success('Birthday deleted successfully');
+      setDeleteModalOpen(false);
+    } catch (error) {
+      toast.error('Failed to delete birthday');
+    } finally {
+      setDeleteModalLoading(false);
     }
   };
 
@@ -239,7 +269,12 @@ export function LocalBirthdayView() {
         <BirthdayList 
           birthdays={sorted} 
           onEdit={b => { setEditBirthday(b); setModalOpen(true); }}
-          onDelete={handleDelete}
+          onDelete={(id) => {
+            const birthday = birthdays.find(b => b.id === id);
+            if (birthday) {
+              openDeleteModal(id, birthday.fullName);
+            }
+          }}
         />
       )}
 
@@ -247,7 +282,12 @@ export function LocalBirthdayView() {
         open={modalOpen}
         onClose={() => { setModalOpen(false); setEditBirthday(undefined); }}
         onSave={handleSave}
-        onDelete={handleDelete}
+        onDelete={(id) => {
+          const birthday = birthdays.find(b => b.id === id);
+          if (birthday) {
+            openDeleteModal(id, birthday.fullName);
+          }
+        }}
         initialBirthday={editBirthday}
       />
       
@@ -255,6 +295,17 @@ export function LocalBirthdayView() {
         open={importModalOpen}
         onClose={() => setImportModalOpen(false)}
         onImportComplete={handleImportComplete}
+      />
+
+      <DeleteModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title={deleteModalTitle}
+        description={deleteModalDescription}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        loading={deleteModalLoading}
       />
     </div>
   );

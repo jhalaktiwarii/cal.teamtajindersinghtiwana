@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "My Calender ",
-  description: "My Calender App",
+  title: "Team Tajinder Singh Tiwana",
+  description: "Team Tajinder Singh Tiwana",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "My Calender App",
+    title: "Team Tajinder Singh Tiwana Calendar",
     startupImage: [
       {
         url: "/icon512_rounded.png",

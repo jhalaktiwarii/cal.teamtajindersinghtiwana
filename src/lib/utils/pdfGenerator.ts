@@ -14,7 +14,7 @@ export interface PDFGeneratorOptions {
 
 export const generateAppointmentsDocx = async (events: CalendarEvent[], options: PDFGeneratorOptions = {}) => {
   const {
-    personName = 'माननीय आमदार संजय उपाध्याय जी'
+    personName = 'माननीय आमदार ताजिंदर सिंह तिवाना जी'
   } = options;
   
   const filteredEvents = events;

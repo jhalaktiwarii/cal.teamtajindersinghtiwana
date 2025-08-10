@@ -1,7 +1,7 @@
 {
-  "name": "Appointment Schedule TSU",
-  "short_name": "Appointment Schedule TSU",
-  "description": "My Calender App",
+  "name": "Appointment Schedule TST",
+  "short_name": "Appointment Schedule TST",
+  "description": "Team Tajinder Singh Tiwana Calendar App",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

@@ -6,6 +6,8 @@ import BirthdayModal from '../../components/BirthdayModal';
 import ExcelImportModal from './ExcelImportModal';
 import type { Birthday } from '@/app/types/birthday';
 import { includesCI } from '@/utils/strings';
+import { DeleteModal } from '@/components/modals/DeleteModal';
+import { toast } from 'sonner';
 
 interface BirthdayViewProps {
   birthdays: Birthday[];
@@ -31,6 +33,13 @@ export function BirthdayView({ birthdays, onSave, onDelete }: BirthdayViewProps)
   const [modalOpen, setModalOpen] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [editBirthday, setEditBirthday] = useState<Birthday | undefined>(undefined);
+  
+  // Delete modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteModalLoading, setDeleteModalLoading] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [deleteModalTitle, setDeleteModalTitle] = useState('');
+  const [deleteModalDescription, setDeleteModalDescription] = useState('');
 
   const filtered = useMemo(() => {
     if (!search) return birthdays;
@@ -53,6 +62,28 @@ export function BirthdayView({ birthdays, onSave, onDelete }: BirthdayViewProps)
   const handleImportComplete = () => {
     // The birthdays will be updated through the parent component's state
     // No need to reload the page
+  };
+
+  const openDeleteModal = (id: string, name: string) => {
+    setItemToDelete(id);
+    setDeleteModalTitle("Delete Birthday?");
+    setDeleteModalDescription(`Are you sure you want to delete "${name}"'s birthday? This action cannot be undone.`);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete) return;
+    
+    setDeleteModalLoading(true);
+    try {
+      onDelete(itemToDelete);
+      toast.success('Birthday deleted successfully');
+      setDeleteModalOpen(false);
+    } catch (error) {
+      toast.error('Failed to delete birthday');
+    } finally {
+      setDeleteModalLoading(false);
+    }
   };
 
   return (
@@ -100,7 +131,12 @@ export function BirthdayView({ birthdays, onSave, onDelete }: BirthdayViewProps)
       <BirthdayList 
         birthdays={sorted} 
         onEdit={b => { setEditBirthday(b); setModalOpen(true); }}
-        onDelete={onDelete}
+        onDelete={(id) => {
+          const birthday = birthdays.find(b => b.id === id);
+          if (birthday) {
+            openDeleteModal(id, birthday.fullName);
+          }
+        }}
       />
       <div className="h-20 sm:h-16"></div> {/* Spacer for floating action button */}
       <BirthdayModal
@@ -114,6 +150,17 @@ export function BirthdayView({ birthdays, onSave, onDelete }: BirthdayViewProps)
         open={importModalOpen}
         onClose={() => setImportModalOpen(false)}
         onImportComplete={handleImportComplete}
+      />
+
+      <DeleteModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title={deleteModalTitle}
+        description={deleteModalDescription}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        loading={deleteModalLoading}
       />
     </div>
   );

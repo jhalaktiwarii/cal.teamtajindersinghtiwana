@@ -2,9 +2,9 @@ import type { MetadataRoute } from 'next'
  
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name:  "Appointment Schedule TSU",
-    short_name:"Appointment Schedule TSU",
-    description:  "My Calender App",
+    name:  "Appointment Schedule TST",
+    short_name:"Appointment Schedule TST",
+    description:  "Team Tajinder Singh Tiwana Calendar App",
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',
