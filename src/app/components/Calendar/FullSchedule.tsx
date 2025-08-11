@@ -14,7 +14,6 @@ import { toast } from 'sonner'
 import { ShareDialog } from '@/app/components/ShareDialog'
 import { format } from 'date-fns'
 import { RainbowButton } from '@/components/ui/rainbow-button'
-import { lower } from '@/utils/strings'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -23,7 +22,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { generateAppointmentsDocx } from '@/lib/utils/pdfGenerator';
 import { toMarathiDigits, toMarathiTime, getMarathiDay } from '@/app/utils/dateUtils';
-import { DeleteModal } from '@/components/modals/DeleteModal';
 
 interface FullPageScheduleProps {
   date: Date
@@ -43,13 +41,6 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
   const [showPdfContent, setShowPdfContent] = useState(false);
   const [pendingPdf, setPendingPdf] = useState(false);
   const pdfRef = useRef<HTMLDivElement>(null);
-  
-  // Delete modal state
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [deleteModalLoading, setDeleteModalLoading] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
-  const [deleteModalTitle, setDeleteModalTitle] = useState('');
-  const [deleteModalDescription, setDeleteModalDescription] = useState('');
 
   // Update events when initialEvents changes
   useEffect(() => {
@@ -153,7 +144,7 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
         )
       )
       
-              toast.success(`Appointment ${lower(newStatus)} successfully`)
+      toast.success(`Appointment ${newStatus.toLowerCase()} successfully`)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to update status')
     } finally {
@@ -210,48 +201,6 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
     }
   }
 
-  const openDeleteModal = (eventId: string, title: string, description: string) => {
-    setItemToDelete(eventId);
-    setDeleteModalTitle(title);
-    setDeleteModalDescription(description);
-    setDeleteModalOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!itemToDelete) return;
-    
-    setDeleteModalLoading(true);
-    try {
-      if (itemToDelete === 'bulk') {
-        const result = await appointmentService.deleteMultipleAppointments(selectedEvents);
-        
-        if (result.success) {
-          setEvents(events.filter(event => !selectedEvents.includes(event.appointment.id)));
-          setSelectedEvents([]);
-          toast.success('Selected appointments deleted successfully');
-          setDeleteModalOpen(false);
-          router.refresh();
-        } else {
-          throw new Error(result.error || 'Failed to delete appointments');
-        }
-      } else {
-        const result = await appointmentService.deleteAppointment(itemToDelete);
-        
-        if (result.success) {
-          setEvents(currentEvents => currentEvents.filter(event => event.appointment.id !== itemToDelete));
-          toast.success('Appointment deleted successfully');
-          setDeleteModalOpen(false);
-        } else {
-          throw new Error(result.error || 'Failed to delete appointment');
-        }
-      }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to delete appointment');
-    } finally {
-      setDeleteModalLoading(false);
-    }
-  };
-
   const handleSelectEvent = (eventId: string) => {
     setSelectedEvents(prev => 
       prev.includes(eventId) 
@@ -280,34 +229,6 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
     }
   }
 
-  const openBulkDeleteModal = () => {
-    setDeleteModalTitle("Delete Selected Appointments?");
-    setDeleteModalDescription(`Are you sure you want to delete ${selectedEvents.length} selected appointment(s)? This action cannot be undone.`);
-    setItemToDelete('bulk');
-    setDeleteModalOpen(true);
-  };
-
-  const handleBulkDeleteConfirm = async () => {
-    setDeleteModalLoading(true);
-    try {
-      const result = await appointmentService.deleteMultipleAppointments(selectedEvents);
-      
-      if (result.success) {
-        setEvents(events.filter(event => !selectedEvents.includes(event.appointment.id)));
-        setSelectedEvents([]);
-        toast.success('Selected appointments deleted successfully');
-        setDeleteModalOpen(false);
-        router.refresh();
-      } else {
-        throw new Error(result.error || 'Failed to delete appointments');
-      }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to delete appointments');
-    } finally {
-      setDeleteModalLoading(false);
-    }
-  };
-
   const handleDownloadPDF = () => {
     setShowPdfContent(true);
     setPendingPdf(true);
@@ -316,7 +237,7 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
   const handleDownloadDocx = async () => {
     try {
       await generateAppointmentsDocx(events, {
-        personName: 'माननीय आमदार ताजिंदर सिंह तिवाना जी',
+        personName: 'माननीय आमदार संजय उपाध्याय जी',
       });
       toast.success('Marathi Schedule DOCX downloaded successfully');
     } catch (error) {
@@ -330,7 +251,7 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
 
 
   return (
-    <div className="fixed inset-0 bg-background z-[60] overflow-hidden flex flex-col w-full max-w-full">
+    <div className="fixed inset-0 bg-background z-50 overflow-hidden flex flex-col w-full max-w-full">
       {/* Hidden PDF content for html2pdf.js */}
       {showPdfContent && (
         <div
@@ -362,17 +283,20 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
             border={1}
           >
             <tbody>
-               <tr>
+              {/* Title row */}
+              <tr>
                 <td colSpan={4} style={{ padding: '8px', fontWeight: 700, textAlign: 'center', wordBreak: 'break-word', border: '1px solid #333', fontSize: '18px', background: '#fff' }}>
-                  माननीय आमदार ताजिंदर सिंह तिवाना जी यांचे कार्यक्रम
+                  माननीय आमदार संजय उपाध्याय जी यांचे कार्यक्रम
                 </td>
               </tr>
-               <tr>
+              {/* Date row */}
+              <tr>
                 <td colSpan={4} style={{ padding: '6px', fontWeight: 700, textAlign: 'center', wordBreak: 'break-word', border: '1px solid #333', fontSize: '18px', background: '#fff' }}>
                   {toMarathiDigits(date.getDate())}/{toMarathiDigits(date.getMonth() + 1)}/{toMarathiDigits(date.getFullYear())} ({getMarathiDay(date)})
                 </td>
               </tr>
-               <tr style={{ background: '#f2f2f2' }}>
+              {/* Table headers */}
+              <tr style={{ background: '#f2f2f2' }}>
                 <th style={{ padding: '6px', fontWeight: 700, textAlign: 'center', wordBreak: 'break-word', border: '1px solid #333', fontSize: '18px' }}>अ.क्र</th>
                 <th style={{ padding: '6px', fontWeight: 700, textAlign: 'center', wordBreak: 'break-word', border: '1px solid #333', fontSize: '18px' }}>वेळ</th>
                 <th style={{ padding: '6px', fontWeight: 700, textAlign: 'center', wordBreak: 'break-word', border: '1px solid #333', fontSize: '18px' }}>कार्यक्रम</th>
@@ -426,11 +350,11 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="h-10 sm:h-8 px-3 flex items-center gap-2"
+                  size="icon"
+                  className="h-10 w-10 sm:h-8 sm:w-8"
                 >
                   <Download className="h-4 w-4" />
-                  <span className="hidden sm:inline text-sm font-medium">Download</span>
+                  <span className="sr-only">Download</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -444,21 +368,22 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
             </DropdownMenu>
             <Button
               variant="outline"
-              size="sm"
+              size="icon"
               onClick={() => setIsShareDialogOpen(true)}
-              className="h-10 sm:h-8 px-3 flex items-center gap-2"
+              className="h-10 w-10 sm:h-8 sm:w-8"
             >
               <Share2 className="h-4 w-4" />
-              <span className="hidden sm:inline text-sm font-medium">Share</span>
+              <span className="sr-only">Share</span>
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              size="icon"
               onClick={onClose}
-              className="h-10 sm:h-8 px-3 flex items-center gap-2"
+              className="h-10 w-10 sm:h-8 sm:w-8"
             >
               <X className="h-4 w-4" />
-             </Button>
+              <span className="sr-only">Close</span>
+            </Button>
           </div>
         </div>
       </div>
@@ -507,8 +432,8 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
                             )}
                             <Badge 
                               variant="secondary" 
-                                              className={lower(event.appointment.status) === 'scheduled' ? 'bg-green-500/15 text-green-700'
-                  : lower(event.appointment.status) === 'going' ? 'bg-blue-500/15 text-blue-700'
+                              className={event.appointment.status.toLowerCase() === 'scheduled' ? 'bg-green-500/15 text-green-700' 
+                                : event.appointment.status.toLowerCase() === 'going' ? 'bg-blue-500/15 text-blue-700'
                                 : 'bg-red-500/15 text-red-700'}
                             >
                               {event.appointment.status}
@@ -551,16 +476,16 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            openDeleteModal(
-                              event.appointment.id,
-                              "Delete Appointment?",
-                              `Are you sure you want to delete "${event.appointment.programName}"? This action cannot be undone.`
-                            );
+                            handleDelete(event.appointment.id);
                           }}
                           className="h-8 w-8 p-0 text-destructive"
-                          disabled={loadingStatus.includes(event.appointment.id)}
+                          disabled={loadingDelete.includes(event.appointment.id) || loadingStatus.includes(event.appointment.id)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          {loadingDelete.includes(event.appointment.id) ? (
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
                         </Button>
                         <Button
                           variant={event.appointment.isUrgent ? "ghost" : "ghost"}
@@ -596,16 +521,16 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            openDeleteModal(
-                              event.appointment.id,
-                              "Delete Appointment?",
-                              `Are you sure you want to delete "${event.appointment.programName}"? This action cannot be undone.`
-                            );
+                            handleDelete(event.appointment.id);
                           }}
                           className="flex items-center gap-1 text-destructive"
-                          disabled={loadingStatus.includes(event.appointment.id)}
+                          disabled={loadingDelete.includes(event.appointment.id) || loadingStatus.includes(event.appointment.id)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          {loadingDelete.includes(event.appointment.id) ? (
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
                           Delete
                         </Button>
                         <Button
@@ -729,9 +654,13 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
         <div className="border-t p-2 sm:p-4 bg-background w-full">
           <Button
             variant="destructive"
-            onClick={openBulkDeleteModal}
+            onClick={handleDeleteSelected}
             className="w-full sm:w-auto"
+            disabled={loadingDelete.some(id => selectedEvents.includes(id))}
           >
+            {loadingDelete.some(id => selectedEvents.includes(id)) ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent mr-2" />
+            ) : null}
             Delete Selected ({selectedEvents.length})
           </Button>
         </div>
@@ -741,17 +670,6 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
         events={events}
         isOpen={isShareDialogOpen}
         onOpenChange={setIsShareDialogOpen}
-      />
-
-      <DeleteModal
-        open={deleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
-        onConfirm={handleDeleteConfirm}
-        title={deleteModalTitle}
-        description={deleteModalDescription}
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
-        loading={deleteModalLoading}
       />
     </div>
   )
