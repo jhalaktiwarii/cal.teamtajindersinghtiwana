@@ -114,8 +114,8 @@ export function DayView({ events, currentDate, onEventClick, onDayDoubleClick, o
                   // Event click is handled by the button itself
                   return;
                 }
-                // Otherwise, treat as time slot click
-                handleAddAppointment(`${hour.toString().padStart(2, '0')}:00`, currentDate);
+                // Otherwise, treat as time slot click - open full schedule for the day
+                onDayDoubleClick(currentDate, `${hour.toString().padStart(2, '0')}:00`);
               }}
             >
               <div className="w-16 py-4 text-right pr-4 text-sm text-gray-400 select-none">

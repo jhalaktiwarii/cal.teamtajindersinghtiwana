@@ -1,6 +1,7 @@
 import * as React from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +29,10 @@ export function LoginForm() {
     setLoading(true);
     setError(null);
     
+     const loadingToast = toast.loading("Signing in...", {
+      description: "Please wait while we authenticate your credentials"
+    });
+    
     try {
       const result = await signIn("credentials", {
         phone: phone.trim(),
@@ -36,13 +41,38 @@ export function LoginForm() {
       });
 
       if (result?.error) {
+        // Dismiss loading toast and show error
+        toast.dismiss(loadingToast);
         setError("Invalid phone number or password");
+        toast.error("Login failed", {
+          description: "Invalid phone number or password. Please try again."
+        });
       } else if (result?.ok) {
-        router.push("/");
-        router.refresh();
+        // Dismiss loading toast and show success
+        toast.dismiss(loadingToast);
+        toast.success("Login successful!", {
+          description: "Redirecting to calendar..."
+        });
+        
+        // Reset form
+        setPhone("");
+        setPassword("");
+        setRemember(false);
+        
+        // Small delay to show success message before redirect
+        setTimeout(() => {
+          router.push("/");
+          router.refresh();
+        }, 1000);
       }
     } catch (err: any) {
-      setError(err?.message ?? "Unable to sign in. Please try again.");
+      // Dismiss loading toast and show error
+      toast.dismiss(loadingToast);
+      const errorMessage = err?.message ?? "Unable to sign in. Please try again.";
+      setError(errorMessage);
+      toast.error("Login failed", {
+        description: errorMessage
+      });
     } finally {
       setLoading(false);
     }
@@ -154,7 +184,7 @@ export function LoginForm() {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
             </svg>
-            Signing in…
+            Signing in...
           </span>
         ) : (
           "Sign In"

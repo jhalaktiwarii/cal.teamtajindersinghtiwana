@@ -63,7 +63,7 @@ export function AuthLayout({
             {/* Brand */}
             <div className="flex items-center gap-3">
               <div className="grid h-9 w-9 place-items-center rounded-full bg-white/40 backdrop-blur-sm font-semibold">
-                TT
+                <img src="/logo.png" alt=""/>
               </div>
               <div>
                 <div className="font-medium leading-tight">Team Tajinder Singh Tiwana</div>
@@ -86,10 +86,29 @@ export function AuthLayout({
         </aside>
 
         {/* RIGHT FORM */}
-        <main className="col-span-12 flex items-center justify-center px-6 py-12 lg:col-span-5">
+        <main className="col-span-12 flex items-start justify-center px-6 py-12 lg:col-span-5 lg:pt-20">
           <div className="w-full max-w-md">
-            <header className="mb-6">
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+            {/* Logo and Branding for small screens */}
+            <div className="mb-8 flex flex-col items-center">
+              <div className="mb-4">
+                <img 
+                  src="/logo.png" 
+                  alt="Tagendra Singh Tiwana" 
+                  className="h-20 w-20 rounded-full object-cover border-2 border-slate-200 shadow-lg"
+                  onError={(e) => {
+                    console.error('Logo failed to load:', e);
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
+              <div className="text-center">
+                <div className="font-bold text-slate-900 dark:text-slate-100 text-xl">Team Tagendra Singh Tiwana</div>
+                <div className="text-sm text-slate-600 dark:text-slate-400 mt-1">Official Calendar</div>l
+              </div>
+            </div>
+            
+            <header className="mb-6 text-center">
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 {headline}
               </h2>
               {subcopy && (

@@ -5,9 +5,8 @@ import { CalendarEvent } from '../../types';
 import { AppointmentList } from './AppointmentList';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Download, Search, Share2, LogOut, X } from 'lucide-react';
+ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon, Download, Search, Share2, LogOut, X, Calendar1Icon } from 'lucide-react';
 import { format, isToday, isTomorrow, isAfter, isBefore, startOfDay, isEqual, addDays } from 'date-fns';
 import { cn } from "@/lib/utils";
 import { signOut } from "next-auth/react";
@@ -26,6 +25,7 @@ import { ShareDialog } from '../ShareDialog';
 import { CollapsibleSection } from '@/components/ui/collapsible-section';
 import { BirthdayList } from './BirthdayList';
 import type { Birthday } from '@/app/types/birthday';
+import { Calendar } from '@/components/ui/calendar';
 
 interface SidebarProps {
   appointments: CalendarEvent[];
@@ -185,7 +185,10 @@ export function Sidebar({
     <div className="h-full flex flex-col">
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold ml-12">Team Tajinder Singh Tiwana</h2>
+          <div className="flex items-center gap-2">
+            <Calendar1Icon className="h-5 w-5 text-gray-500" />
+            <h2 className="text-lg font-semibold ml-2 md:mr-0">My Calender</h2>
+          </div>
           <div className="flex gap-2">
            
           </div>

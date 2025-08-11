@@ -25,12 +25,12 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
 }) => {
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="w-[350px] p-0 border-[#EFEFF4] rounded-xl">
-        <div className="flex flex-col gap-2 p-6">
-          <DialogTitle className="text-xl font-semibold text-center">
+      <DialogContent className="w-[350px] max-w-[90vw] p-0 border-[#EFEFF4] rounded-xl">
+        <div className="flex flex-col gap-2 p-6 sm:p-4">
+          <DialogTitle className="text-xl sm:text-lg font-semibold text-center">
             {title}
           </DialogTitle>
-          <DialogDescription className="text-sm text-center text-gray-500">
+          <DialogDescription className="text-sm sm:text-xs text-center text-gray-500">
             {description}
           </DialogDescription>
         </div>

@@ -22,6 +22,7 @@ interface CalendarViewProps {
   birthdays: Birthday[];
   onSaveBirthday: (bday: Birthday) => void;
   onDeleteBirthday: (id: string) => void;
+  onRefreshBirthdays?: () => void;
   isSidebarOpen?: boolean;
 }
 
@@ -41,6 +42,7 @@ export function CalendarView({
   birthdays,
   onSaveBirthday,
   onDeleteBirthday,
+  onRefreshBirthdays,
   onDateChange,
   isSidebarOpen,
 
@@ -129,6 +131,7 @@ export function CalendarView({
             birthdays={birthdays}
             onSave={onSaveBirthday}
             onDelete={onDeleteBirthday}
+            onRefresh={onRefreshBirthdays}
           />
         ) : viewMode === 'month' ? (
           <MonthView
@@ -154,6 +157,7 @@ export function CalendarView({
             currentDate={currentDate}
             onEventClick={onEventClick}
             onDayDoubleClick={onDayDoubleClick}
+            onAddAppointment={onAddAppointment}
           />
         ) : (
           <YearView
