@@ -119,13 +119,13 @@ export function AppointmentDetails({ event, onEdit, onDelete ,onClose}: Appointm
           </div>
 
           <div className="flex justify-end space-x-2 mt-4">
-            <button
+            {/* <button
               onClick={handleDownload}
               className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-full"
               title="Download"
             >
               <Download className="h-5 w-5" />
-            </button>
+            </button> */}
             {!isPastEvent && (
               <button
                 onClick={onEdit}

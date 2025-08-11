@@ -91,7 +91,7 @@ export function LoginForm() {
             autoComplete="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            placeholder="e.g., 9572167233"
+            placeholder="e.g., 9342489898"
             className="peer w-full rounded-lg border border-slate-300 bg-white pl-10 pr-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700"
             disabled={loading}
           />

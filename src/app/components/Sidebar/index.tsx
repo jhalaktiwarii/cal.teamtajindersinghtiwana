@@ -379,7 +379,7 @@ export function Sidebar({
                 </DropdownMenuCheckboxItem>
               ))}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleExport}>
+              <DropdownMenuItem >
                 Export Selected
               </DropdownMenuItem>
             </DropdownMenuContent>
