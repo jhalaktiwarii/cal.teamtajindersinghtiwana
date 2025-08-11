@@ -37,7 +37,7 @@ interface SidebarProps {
   birthdays: Birthday[];
   onEditBirthday: (bday: Birthday) => void;
   onDeleteBirthday: (id: string) => void;
-
+  onClose?: () => void;
 }
 
 type AppointmentStatus = 'all' | 'going' | 'not-going' | 'scheduled';
@@ -65,6 +65,7 @@ export function Sidebar({
   birthdays,
   onEditBirthday,
   onDeleteBirthday,
+  onClose,
 
 }: SidebarProps) {
   const { data: session } = useSession();

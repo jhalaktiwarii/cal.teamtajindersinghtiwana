@@ -103,7 +103,7 @@ export function AuthLayout({
               </div>
               <div className="text-center">
                 <div className="font-bold text-slate-900 dark:text-slate-100 text-xl">Team Tagendra Singh Tiwana</div>
-                <div className="text-sm text-slate-600 dark:text-slate-400 mt-1">Official Calendar</div>l
+                <div className="text-sm text-slate-600 dark:text-slate-400 mt-1">Official Calendar</div>
               </div>
             </div>
             

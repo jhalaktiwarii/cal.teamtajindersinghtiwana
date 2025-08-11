@@ -32,7 +32,7 @@ export function CalendarHeader({
       <div className="flex justify-start overflow-x-auto">
         <button
           onClick={() => onViewModeChange(viewMode === 'birthday' ? 'month' : 'birthday')}
-          className={`${isSidebarOpen ? 'ml-12 xs:ml-16 sm:ml-20 md:ml-12' : 'ml-4 xs:ml-8 sm:ml-12'} px-2 xs:px-3 sm:px-4 py-1 rounded-md capitalize font-semibold border border-blue-200 shadow-sm transition-colors text-xs xs:text-sm sm:text-base whitespace-nowrap ${
+          className={`ml-12 xs:ml-16 sm:ml-0 px-2 xs:px-3 sm:px-4 py-1 rounded-md capitalize font-semibold border border-blue-200 shadow-sm transition-colors text-xs xs:text-sm sm:text-base whitespace-nowrap ${
             viewMode === 'birthday'
               ? 'bg-blue-50 text-blue-600 border-blue-400'
               : 'bg-white text-blue-500 hover:bg-blue-50'

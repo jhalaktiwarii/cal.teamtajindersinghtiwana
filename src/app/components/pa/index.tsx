@@ -5,8 +5,10 @@ import { toast } from 'sonner';
 
 import { format } from 'date-fns';
 import { useCalendar } from '@/app/hooks/useCalendar';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { Appointment, CalendarEvent, ViewMode } from '@/app/types';
 import { Sidebar } from '../Sidebar';
+import { SidebarDrawer } from '@/components/SidebarDrawer';
 import { CalendarView } from '../Calendar';
 import { FullPageSchedule } from '../Calendar/FullSchedule';
 import { AppointmentDetails } from '../AppointmentDetails';
@@ -31,8 +33,9 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
     previousPeriod,
   } = useCalendar();
   
+  const isMobile = useIsMobile();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile); // Default closed on mobile
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedAppointmentDate, setSelectedAppointmentDate] = useState<Date>(new Date());
@@ -120,6 +123,15 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
   useEffect(() => {
     fetchBirthdays();
   }, []);
+
+  // Ensure sidebar is closed when switching to mobile
+  useEffect(() => {
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    } else {
+      setIsSidebarOpen(true);
+    }
+  }, [isMobile]);
 
 
 
@@ -401,24 +413,20 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
         </div>
       )}
       
-      <button
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="fixed top-4 left-4 z-[70] p-2 rounded-lg bg-white dark:bg-gray-800 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 sm:hidden"
-        aria-label="Toggle Sidebar"
-      >
-        {isSidebarOpen ? (
-          <X className="h-5 w-5" />
-        ) : (
-          <Menu className="h-5 w-5" />
-        )}
-      </button>
-
-       {!showFullSchedule && (
-        <div 
-          className={`fixed inset-y-0 left-0 z-40 w-80 transform transition-transform duration-300 ease-in-out bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 ${
-            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
+      {/* Mobile menu button */}
+      {isMobile && (
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          className="fixed top-4 left-4 z-[70] p-2 rounded-lg bg-white dark:bg-gray-800 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+          aria-label="Open Sidebar"
         >
+          <Menu className="h-5 w-5" />
+        </button>
+      )}
+
+      {/* Desktop Sidebar */}
+      {!isMobile && !showFullSchedule && (
+        <aside className="w-80 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           {(() => {
             try {
               return (
@@ -436,6 +444,7 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
                       openDeleteBirthdayModal(id, birthday.fullName);
                     }
                   }}
+                  onClose={() => setIsSidebarOpen(false)}
                 />
               );
             } catch (error) {
@@ -454,76 +463,103 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
               );
             }
           })()}
-        </div>
+        </aside>
       )}
 
-        <main className={`flex-1 transition-all duration-300 overflow-hidden z-10 ${(isSidebarOpen && !showFullSchedule) ? 'ml-80' : 'ml-0'}`}>
-          <div className="h-full p-1 xs:p-2 sm:p-3 md:p-4 overflow-auto thin-scrollbar">
-            {(() => {
-              try {
-                return (
-                  <CalendarView
-                    viewMode={viewMode}
-                    currentDate={currentDate}
-                    events={appointments}
-                    onEventClick={(event) => setSelectedEvent(event)}
-                    onPrevious={previousPeriod}
-                    onNext={nextPeriod}
-                    onViewModeChange={mode => setViewMode(mode as ViewMode)}
-                    onAddAppointment={(date, time) => handleAddSchedule(time, date)}
-                    onDayDoubleClick={(date, ) => handleOpenFullSchedule(date)}
-                    onDateChange={date => {
-                      setSelectedDate(date);
-                      handleOpenFullSchedule(date);
-                    }}
-                    birthdays={birthdays}
-                    onSaveBirthday={handleSaveBirthday}
-                    onDeleteBirthday={(id) => {
-                      const birthday = birthdays.find(b => b.id === id);
-                      if (birthday) {
-                        openDeleteBirthdayModal(id, birthday.fullName);
-                      }
-                    }}
-                    onRefreshBirthdays={fetchBirthdays}
-                    isSidebarOpen={isSidebarOpen}
-                  />
-                );
-              } catch (error) {
-                console.error('Error rendering CalendarView:', error);
-                return (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center">
-                      <h3 className="text-lg font-semibold text-red-800 mb-2">Calendar Error</h3>
-                      <p className="text-red-600 mb-4">Failed to load calendar view</p>
-                      <button 
-                        onClick={() => window.location.reload()}
-                        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-                      >
-                        Reload Page
-                      </button>
-                    </div>
+      {/* Main Content */}
+      <main className="flex-1 overflow-hidden">
+        <div className="h-full p-1 xs:p-2 sm:p-3 md:p-4 overflow-auto thin-scrollbar">
+          {(() => {
+            try {
+              return (
+                <CalendarView
+                  viewMode={viewMode}
+                  currentDate={currentDate}
+                  events={appointments}
+                  onEventClick={(event) => setSelectedEvent(event)}
+                  onPrevious={previousPeriod}
+                  onNext={nextPeriod}
+                  onViewModeChange={mode => setViewMode(mode as ViewMode)}
+                  onAddAppointment={(date, time) => handleAddSchedule(time, date)}
+                  onDayDoubleClick={(date, ) => handleOpenFullSchedule(date)}
+                  onDateChange={date => {
+                    setSelectedDate(date);
+                    handleOpenFullSchedule(date);
+                  }}
+                  birthdays={birthdays}
+                  onSaveBirthday={handleSaveBirthday}
+                  onDeleteBirthday={(id) => {
+                    const birthday = birthdays.find(b => b.id === id);
+                    if (birthday) {
+                      openDeleteBirthdayModal(id, birthday.fullName);
+                    }
+                  }}
+                  onRefreshBirthdays={fetchBirthdays}
+                  isSidebarOpen={!isMobile}
+                />
+              );
+            } catch (error) {
+              console.error('Error rendering CalendarView:', error);
+              return (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <h3 className="text-lg font-semibold text-red-800 mb-2">Calendar Error</h3>
+                    <p className="text-red-600 mb-4">Failed to load calendar view</p>
+                    <button 
+                      onClick={() => window.location.reload()}
+                      className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                    >
+                      Reload Page
+                    </button>
                   </div>
+                </div>
+              );
+            }
+          })()}
+          {showFullSchedule && selectedDate && (
+            <FullPageSchedule
+              date={selectedDate}
+              onClose={handleCloseFullSchedule}
+              onAddSchedule={handleAddSchedule}
+              events={appointments.filter(event => {
+                if (!selectedDate) return false;
+                const eventDate = new Date(event.appointment.startTime);
+                return (
+                  eventDate.getFullYear() === selectedDate.getFullYear() &&
+                  eventDate.getMonth() === selectedDate.getMonth() &&
+                  eventDate.getDate() === selectedDate.getDate()
                 );
+              })}
+            />
+          )}
+        </div>
+      </main>
+
+      {/* Mobile Sidebar Drawer */}
+      {isMobile && (
+        <SidebarDrawer
+          open={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          width={340}
+        >
+          <Sidebar
+            appointments={appointments}
+            onStatusChange={handleStatusChange}
+            onUrgencyChange={handleUrgencyChange}
+            isDarkMode={false}
+            setIsSidebarOpen={setIsSidebarOpen}
+            birthdays={birthdays}
+            onEditBirthday={handleEditBirthday}
+            onDeleteBirthday={(id) => {
+              const birthday = birthdays.find(b => b.id === id);
+              if (birthday) {
+                openDeleteBirthdayModal(id, birthday.fullName);
               }
-            })()}
-            {showFullSchedule && selectedDate && (
-              <FullPageSchedule
-                date={selectedDate}
-                onClose={handleCloseFullSchedule}
-                onAddSchedule={handleAddSchedule}
-                events={appointments.filter(event => {
-                  if (!selectedDate) return false;
-                  const eventDate = new Date(event.appointment.startTime);
-                  return (
-                    eventDate.getFullYear() === selectedDate.getFullYear() &&
-                    eventDate.getMonth() === selectedDate.getMonth() &&
-                    eventDate.getDate() === selectedDate.getDate()
-                  );
-                })}
-              />
-            )}
-          </div>
-        </main>
+            }}
+            onClose={() => setIsSidebarOpen(false)}
+          />
+        </SidebarDrawer>
+      )}
       
 
       {selectedEvent && (
