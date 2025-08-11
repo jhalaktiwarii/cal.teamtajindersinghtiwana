@@ -210,22 +210,22 @@ export default function MLAView() {
 
        <div className="relative px-4 sm:hidden mb-4 mt-4 flex-shrink-0">
         <Input
-          className="w-full rounded-xl bg-slate-100 pl-6 focus-visible:ring-slate-200"
+          className="w-full rounded-xl bg-slate-100 pl-6 pr-8 focus-visible:ring-slate-200"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search appointments..."
           style={{ boxShadow: "rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px" }}
         />
-        {searchQuery === "" ? (
-          <Search
-            className="absolute right-7 top-3 h-4 w-4 text-slate-600"
-            size={25}
-          />
-        ) : (
-          <X
-            className="absolute right-7 top-3 h-4 w-4 cursor-pointer text-slate-600"
-            size={25}
+        {searchQuery ? (
+          <button
             onClick={() => setSearchQuery("")}
+            className="absolute right-7 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600 hover:text-slate-800"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        ) : (
+          <Search
+            className="absolute right-7 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600"
           />
         )}
       </div>

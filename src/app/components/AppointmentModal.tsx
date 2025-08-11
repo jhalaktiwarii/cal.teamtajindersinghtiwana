@@ -171,7 +171,7 @@ export function AppointmentModal({
                   <FormItem>
                     <FormLabel>Start Time</FormLabel>
                     <FormControl>
-                      <TimePicker date={field.value} setDate={field.onChange} />
+                      <TimePicker date={field.value} setDate={field.onChange} minTime={minTime} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

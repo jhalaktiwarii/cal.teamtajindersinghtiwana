@@ -1,12 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Clock } from "lucide-react"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { Clock, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -18,165 +13,121 @@ interface TimePickerProps {
 }
 
 export function TimePicker({ date, setDate, className, minTime }: TimePickerProps) {
-  const [open, setOpen] = React.useState(false);
-  const [selectedTime, setSelectedTime] = React.useState(() => {
-    if (!date) return { hour: 12, minute: 0, period: "AM" }
-    const hours = date.getHours()
-    return {
-      hour: hours % 12 || 12,
-      minute: date.getMinutes(),
-      period: hours >= 12 ? "PM" : "AM"
-    }
-  })
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [openUpward, setOpenUpward] = React.useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
 
-  const periods = ["AM", "PM"]
-
-  const updateTime = (update: Partial<typeof selectedTime>) => {
-    const newTime = { ...selectedTime, ...update }
-    setSelectedTime(newTime)
-
-    if (date) {
-      const newDate = new Date(date)
-      const hours = newTime.period === "AM" ? 
-        (newTime.hour === 12 ? 0 : newTime.hour) : 
-        (newTime.hour === 12 ? 12 : newTime.hour + 12)
-      newDate.setHours(hours)
-      newDate.setMinutes(newTime.minute)
-      newDate.setSeconds(0) // Set seconds to 0
-      newDate.setMilliseconds(0) // Set milliseconds to 0
-      
-      // If minTime is provided, ensure the new time is not before it
-      if (minTime) {
-        if (newDate.getTime() >= minTime.getTime()) {
-          setDate(newDate)
-        }
-      } else {
-        setDate(newDate)
+  // Generate time options
+  const generateTimeOptions = () => {
+    const options = [];
+    
+    for (let hour = 0; hour < 24; hour++) {
+      for (let minute = 0; minute < 60; minute += 15) { // 15-minute intervals
+        const time = new Date();
+        time.setHours(hour, minute, 0, 0);
+        
+        // Skip times before minTime
+        if (minTime && time < minTime) continue;
+        
+        const timeString = time.toLocaleTimeString([], { 
+          hour: "2-digit", 
+          minute: "2-digit", 
+          hour12: true 
+        });
+        
+        options.push({
+          value: time.getTime(),
+          label: timeString,
+          time: time
+        });
       }
     }
-  }
+    
+    return options;
+  };
 
-  const [hourInput, setHourInput] = React.useState(selectedTime.hour.toString().padStart(2, "0"));
-  const [minuteInput, setMinuteInput] = React.useState(selectedTime.minute.toString().padStart(2, "0"));
+  const timeOptions = generateTimeOptions();
+  const currentValue = date ? date.getTime() : undefined;
+  const selectedOption = timeOptions.find(option => option.value === currentValue);
 
+  const handleTimeSelect = (selectedTime: number) => {
+    const newDate = new Date(selectedTime);
+    setDate(newDate);
+    setIsOpen(false);
+  };
+
+  const handleToggleDropdown = () => {
+    if (!isOpen) {
+      // Check available space when opening
+      const rect = dropdownRef.current?.getBoundingClientRect();
+      if (rect) {
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        const dropdownHeight = 192; // max-h-48 = 192px
+        
+        // Open upward if there's not enough space below but enough space above
+        setOpenUpward(spaceBelow < dropdownHeight && spaceAbove > dropdownHeight);
+      }
+    }
+    setIsOpen(!isOpen);
+  };
+
+  // Close dropdown when clicking outside
   React.useEffect(() => {
-    setHourInput(selectedTime.hour.toString().padStart(2, "0"));
-    setMinuteInput(selectedTime.minute.toString().padStart(2, "0"));
-  }, [selectedTime.hour, selectedTime.minute]);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant={"outline"}
-          className={cn(
-            "w-full justify-start text-left font-normal h-10 border-gray-300",
-            !date && "text-muted-foreground",
-            className
-          )}
-        >
+    <div className="relative" ref={dropdownRef}>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={handleToggleDropdown}
+        className={cn(
+          "w-full justify-between text-left font-normal h-10 border-gray-300",
+          !date && "text-gray-500",
+          className
+        )}
+      >
+        <div className="flex items-center">
           <Clock className="mr-2 h-4 w-4" />
-          {date ? (
-            date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true })
-          ) : (
-            <span>Pick a time</span>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[280px] p-4 flex flex-col items-center" align="start">
-        <div className="mb-2 text-xs font-semibold tracking-widest text-gray-500 uppercase">Select Time</div>
-        <div className="flex items-center justify-center gap-2 w-full">
-          {/* Hour input */}
-          <input
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            maxLength={2}
-            className="rounded-md border px-4 py-1 text-3xl font-bold w-16 text-center focus:outline-none focus:ring-2 focus:ring-violet-400 bg-violet-50 text-violet-700 border-violet-200 shadow-sm box-border"
-            value={hourInput}
-            onChange={e => {
-              const val = e.target.value.replace(/\D/g, "");
-              if (val.length > 2) {
-                setHourInput(val.slice(0, 2));
-              } else {
-                setHourInput(val);
-              }
-            }}
-            onBlur={e => {
-              const val = e.target.value.replace(/\D/g, "");
-              let num = Number(val);
-              if (val === "" || num < 1) num = 1;
-              if (num > 12) num = 12;
-              setHourInput(num.toString().padStart(2, "0"));
-              updateTime({ hour: num });
-            }}
-          />
-          <div className="text-4xl font-bold text-gray-400 select-none">:</div>
-          {/* Minute input */}
-          <input
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            maxLength={2}
-            className="rounded-md border px-4 py-1 text-3xl font-bold w-16 text-center focus:outline-none focus:ring-2 focus:ring-violet-400 bg-gray-100 text-gray-900 border-gray-200 shadow-sm box-border"
-            value={minuteInput}
-            onChange={e => {
-              const val = e.target.value.replace(/\D/g, "");
-              if (val.length > 2) {
-                setMinuteInput(val.slice(0, 2));
-              } else {
-                setMinuteInput(val);
-              }
-            }}
-            onBlur={e => {
-              const val = e.target.value.replace(/\D/g, "");
-              let num = Number(val);
-              if (val === "" || num < 0) num = 0;
-              if (num > 59) num = 59;
-              setMinuteInput(num.toString().padStart(2, "0"));
-              updateTime({ minute: num });
-            }}
-            onKeyDown={e => {
-              if (e.key === 'Enter') {
-                const val = (e.target as HTMLInputElement).value.replace(/\D/g, "");
-                let num = Number(val);
-                if (val === "" || num < 0) num = 0;
-                if (num > 59) num = 59;
-                setMinuteInput(num.toString().padStart(2, "0"));
-                updateTime({ minute: num });
-              }
-            }}
-          />
-          {/* AM/PM Selector */}
-          <div className="flex flex-col ml-4 gap-1">
-            {periods.map((p) => (
-              <button
-                key={p}
-                type="button"
-                onClick={() => updateTime({ period: p })}
-                className={cn(
-                  "px-4 py-1 rounded-md border text-base font-semibold transition-all",
-                  selectedTime.period === p
-                    ? "bg-violet-50 text-violet-700 border-violet-300 shadow"
-                    : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
-                )}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
+          {selectedOption ? selectedOption.label : "Select time"}
         </div>
-        {/* OK Button */}
-        <div className="flex justify-center mt-5 w-full">
-          <Button
-            type="button"
-            className="w-24 bg-violet-600 text-white hover:bg-violet-700 h-9 rounded-md font-medium transition-colors"
-            onClick={() => setOpen(false)}
-          >
-            OK
-          </Button>
+        <ChevronDown className={cn(
+          "h-4 w-4 transition-transform",
+          isOpen && "rotate-180"
+        )} />
+      </Button>
+      
+      {isOpen && (
+        <div className={cn(
+          "absolute z-50 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto",
+          openUpward ? "bottom-full mb-1" : "top-full mt-1"
+        )}>
+          {timeOptions.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => handleTimeSelect(option.value)}
+              className={cn(
+                "w-full px-3 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none",
+                option.value === currentValue && "bg-blue-50 text-blue-700"
+              )}
+            >
+              {option.label}
+            </button>
+          ))}
         </div>
-      </PopoverContent>
-    </Popover>
+      )}
+    </div>
   )
 }

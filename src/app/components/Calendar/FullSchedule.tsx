@@ -426,11 +426,11 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  size="icon"
-                  className="h-10 w-10 sm:h-8 sm:w-8"
+                  size="sm"
+                  className="h-10 sm:h-8 px-3 flex items-center gap-2"
                 >
                   <Download className="h-4 w-4" />
-                  <span className="sr-only">Download</span>
+                  <span className="hidden sm:inline text-sm font-medium">Download</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -444,22 +444,21 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
             </DropdownMenu>
             <Button
               variant="outline"
-              size="icon"
+              size="sm"
               onClick={() => setIsShareDialogOpen(true)}
-              className="h-10 w-10 sm:h-8 sm:w-8"
+              className="h-10 sm:h-8 px-3 flex items-center gap-2"
             >
               <Share2 className="h-4 w-4" />
-              <span className="sr-only">Share</span>
+              <span className="hidden sm:inline text-sm font-medium">Share</span>
             </Button>
             <Button
               variant="outline"
-              size="icon"
+              size="sm"
               onClick={onClose}
-              className="h-10 w-10 sm:h-8 sm:w-8"
+              className="h-10 sm:h-8 px-3 flex items-center gap-2"
             >
               <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </Button>
+             </Button>
           </div>
         </div>
       </div>
