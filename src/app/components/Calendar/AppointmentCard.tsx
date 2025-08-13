@@ -8,7 +8,7 @@ import { CalendarEvent } from "@/app/types";
 
 interface AppointmentCardProps {
   item: CalendarEvent;
-  role: "staff" | "mla";
+  role: "staff" | "BJYM";
   onStatusChange: (id: string, status: 'going' | 'not-going' | 'scheduled') => void;
   onClick?: () => void;
 }
@@ -144,7 +144,7 @@ export function AppointmentCard({ item, role, onStatusChange, onClick }: Appoint
             </div>
           )}
 
-          {role === "mla" && (
+          {role === "BJYM" && (
             <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
               <CompactApprovalButtons
                 onApprove={() => appointment?.id && onStatusChange(appointment.id, 'going')}
@@ -154,7 +154,7 @@ export function AppointmentCard({ item, role, onStatusChange, onClick }: Appoint
             </div>
           )}
           
-          {/* Status chip - only show for staff view since MLA view shows status in approval buttons */}
+                        {/* Status chip - only show for staff view since BJYM view shows status in approval buttons */}
           {role === "staff" && (
             <div className="ml-3">
               <span className={cn(

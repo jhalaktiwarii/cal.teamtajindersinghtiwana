@@ -10,7 +10,7 @@ import type { Birthday } from "@/app/types/birthday";
 import { Button } from "@/components/ui/button";
 
 interface ListViewProps {
-  role?: "mla" | "staff";
+  role?: "BJYM" | "staff";
   appointments: CalendarEvent[];
   birthdays: Birthday[];
   view: "appointments" | "birthdays";
@@ -23,7 +23,7 @@ interface ListViewProps {
 }
 
 export default function ListView({ 
-  role = "mla", 
+  role = "BJYM", 
   appointments, 
   birthdays, 
   view, 

@@ -141,7 +141,7 @@
       }
     },
     "roles": {
-      "MLA": {
+      "BJYM": {
         "canExport": true,
         "canUpdateStatus": true,
         "viewOnlyBirthdays": false,

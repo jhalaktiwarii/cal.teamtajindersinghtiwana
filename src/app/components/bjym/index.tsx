@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 import { DeleteModal } from '@/components/modals/DeleteModal';
 import { AppointmentDetails } from '../AppointmentDetails';
 
-export default function MLAView() {
+export default function BJYMView() {
   const { appointments, loading, updateAppointment } = useAppointments();
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -295,7 +295,7 @@ export default function MLAView() {
            {/* ListView Component */}
            <div className="flex-1 overflow-hidden">
              <ListView
-               role="mla"
+               role="BJYM"
                appointments={appointments}
                birthdays={birthdays}
                view={viewMode}

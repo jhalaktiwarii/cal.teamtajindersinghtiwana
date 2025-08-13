@@ -93,9 +93,9 @@ export function Sidebar({
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  // Auto-open sidebar for MLA role on mobile
+  // Auto-open sidebar for BJYM role on mobile
   useEffect(() => {
-    if (session?.user?.role === 'mla' && isMobile) {
+    if (session?.user?.role === 'BJYM' && isMobile) {
       setIsSidebarOpen(true);
     }
   }, [session?.user?.role, isMobile, setIsSidebarOpen]);

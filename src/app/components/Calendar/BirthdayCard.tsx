@@ -4,7 +4,7 @@ import type { Birthday } from "@/app/types/birthday";
 
 interface BirthdayCardProps {
   item: Birthday;
-  role: "staff" | "mla";
+  role: "staff" | "BJYM";
 }
 
 export function BirthdayCard({ item, role }: BirthdayCardProps) {

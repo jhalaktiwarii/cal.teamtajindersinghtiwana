@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useAuth } from './hooks/useAuth';
-import MLAView from './components/mla';
+import BJYMView from './components/bjym';
 import PAView from './components/pa';
 import { LoadingSpinner, ErrorBoundary } from './components/ui/loading';
 import { useState } from 'react';
@@ -11,7 +11,7 @@ import AddScheduleDialog from '../components/AddScheduleDialog';
 import { useAppointments } from './hooks/useAppointments';
 
 function AppContent() {
-  const { isMLA, role } = useAuth();
+  const { isBJYM, role } = useAuth();
   const [showCreate, setShowCreate] = useState(false);
   const { appointments, saveAppointment, updateAppointment, deleteAppointment } = useAppointments();
 
@@ -21,7 +21,7 @@ function AppContent() {
 
   return (
     <>
-      {isMLA ? <MLAView /> : <PAView appointments={appointments} saveAppointment={saveAppointment} updateAppointment={updateAppointment} deleteAppointment={deleteAppointment} />}
+      {isBJYM ? <BJYMView /> : <PAView appointments={appointments} saveAppointment={saveAppointment} updateAppointment={updateAppointment} deleteAppointment={deleteAppointment} />}
       {/* Floating Create Button */}
       <button
         className="fixed bottom-8 right-8 z-[70] w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
