@@ -20,12 +20,14 @@ interface AppointmentListProps {
   appointments: CalendarEvent[];
   onStatusChange?: (id: string, status: 'scheduled' | 'going' | 'not-going') => void;
   onUrgencyChange?: (id: string, isUrgent: boolean) => void;
+  role?: "staff" | "BJYM";
 }
 
 export function AppointmentList({ 
   appointments,
   onStatusChange,
   onUrgencyChange,
+  role = "staff",
 }: AppointmentListProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -136,21 +138,70 @@ export function AppointmentList({
                 </div>
 
                 <div className="flex items-center gap-1">
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <CompactApprovalButtons
-                      onApprove={() => {
-                        if (onStatusChange && event.appointment?.id) {
-                          onStatusChange(event.appointment.id, 'going');
-                        }
-                      }}
-                      onDecline={() => {
-                        if (onStatusChange && event.appointment?.id) {
-                          onStatusChange(event.appointment.id, 'not-going');
-                        }
-                      }}
-                      currentStatus={event.appointment?.status as 'scheduled' | 'going' | 'not-going'}
-                    />
-                  </div>
+                  {role === "BJYM" ? (
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <CompactApprovalButtons
+                        onApprove={() => {
+                          if (onStatusChange && event.appointment?.id) {
+                            onStatusChange(event.appointment.id, 'going');
+                          }
+                        }}
+                        onDecline={() => {
+                          if (onStatusChange && event.appointment?.id) {
+                            onStatusChange(event.appointment.id, 'not-going');
+                          }
+                        }}
+                        currentStatus={event.appointment?.status as 'scheduled' | 'going' | 'not-going'}
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                      {event.appointment?.status === 'going' && (
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          onClick={() => event.appointment?.id && onStatusChange?.(event.appointment.id, 'not-going')}
+                          className="h-5 w-5 xs:h-6 xs:w-6 p-0 hover:bg-red-100"
+                          title="Mark as Not Going"
+                        >
+                          <XCircle className="h-3 w-3 xs:h-4 xs:w-4 text-red-600" />
+                        </Button>
+                      )}
+                      {event.appointment?.status === 'not-going' && (
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          onClick={() => event.appointment?.id && onStatusChange?.(event.appointment.id, 'going')}
+                          className="h-5 w-5 xs:h-6 xs:w-6 p-0 hover:bg-emerald-100"
+                          title="Mark as Going"
+                        >
+                          <CheckCircle2 className="h-3 w-3 xs:h-4 xs:w-4 text-emerald-600" />
+                        </Button>
+                      )}
+                      {event.appointment?.status !== 'going' && event.appointment?.status !== 'not-going' && (
+                        <>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            onClick={() => event.appointment?.id && onStatusChange?.(event.appointment.id, 'going')}
+                            className="h-5 w-5 xs:h-6 xs:w-6 p-0 hover:bg-emerald-100"
+                            title="Mark as Going"
+                          >
+                            <CheckCircle2 className="h-3 w-3 xs:h-4 xs:w-4 text-emerald-600" />
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            onClick={() => event.appointment?.id && onStatusChange?.(event.appointment.id, 'not-going')}
+                            className="h-5 w-5 xs:h-6 xs:w-6 p-0 hover:bg-red-100"
+                            title="Mark as Not Going"
+                          >
+                            <XCircle className="h-3 w-3 xs:h-4 xs:w-4 text-red-600" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  )}
                   <span className={cn(
                     "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap",
                     getStatusColor(event.appointment?.status ?? 'scheduled')

@@ -293,6 +293,7 @@ export function Sidebar({
               appointments={filteredAppointments}
               onStatusChange={onStatusChange}
               onUrgencyChange={onUrgencyChange}
+              role={session?.user?.role as "staff" | "BJYM"}
             />
             {filteredAppointments.length === 0 && (
               <div className="text-center text-gray-500 py-4">
@@ -311,6 +312,7 @@ export function Sidebar({
                 appointments={todayAppointments}
                 onStatusChange={onStatusChange}
                 onUrgencyChange={onUrgencyChange}
+                role={session?.user?.role as "staff" | "BJYM"}
               />
             </CollapsibleSection>
 
@@ -323,6 +325,7 @@ export function Sidebar({
                 appointments={tomorrowAppointments}
                 onStatusChange={onStatusChange}
                 onUrgencyChange={onUrgencyChange}
+                role={session?.user?.role as "staff" | "BJYM"}
               />
             </CollapsibleSection>
 
@@ -335,6 +338,7 @@ export function Sidebar({
                 appointments={upcomingAppointments}
                 onStatusChange={onStatusChange}
                 onUrgencyChange={onUrgencyChange}
+                role={session?.user?.role as "staff" | "BJYM"}
               />
             </CollapsibleSection>
           </>
