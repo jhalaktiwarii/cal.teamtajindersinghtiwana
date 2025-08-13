@@ -39,9 +39,7 @@ const formSchema = z.object({
   eventFrom: z.string().min(2, {
     message: "Event organizer must be at least 2 characters.",
   }),
-  contactNo: z.string().min(10, {
-    message: "Contact number must be at least 10 digits.",
-  }),
+  contactNo: z.string().optional()
 })
 
 interface AppointmentFormProps {

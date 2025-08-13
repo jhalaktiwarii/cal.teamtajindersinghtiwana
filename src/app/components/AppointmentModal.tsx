@@ -40,7 +40,7 @@ const formSchema = z.object({
   address: z.string().min(4, { message: "Address must be at least 4 characters." }),
   startTime: z.date({ required_error: "Please select a start time" }),
   eventFrom: z.string().min(2, { message: "Event organizer must be at least 2 characters." }),
-  contactNo: z.string().min(10, { message: "Contact number must be at least 10 digits." }),
+  contactNo: z.string().optional(),
   isUrgent: z.boolean().default(false),
 });
 
@@ -111,10 +111,10 @@ export function AppointmentModal({
         address: values.address,
         startTime: values.startTime.toISOString(),
         eventFrom: values.eventFrom,
-        contactNo: values.contactNo,
+        contactNo: values.contactNo || undefined,
         status: appointment?.status || 'scheduled',
         isUrgent: values.isUrgent,
-        userid: values.contactNo,
+        userid: values.contactNo || appointment?.userid || '',
       });
       onClose();
       form.reset();

@@ -88,7 +88,7 @@ export interface Appointment {
   notes?: string;
   isUrgent: boolean;
   eventFrom: string;
-  contactNo: string;
+  contactNo?: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -32,9 +32,9 @@ export default function AddScheduleDialog({ open, onClose, onSave }: AddSchedule
       address,
       startTime: start.toISOString(),
       eventFrom,
-      contactNo,
+      contactNo: contactNo || undefined,
       isUrgent: false,
-      userid: contactNo, // or use the correct user id if available
+      userid: contactNo || '',
       status: 'scheduled',
     });
     setIsSaving(false);
@@ -81,7 +81,7 @@ export default function AddScheduleDialog({ open, onClose, onSave }: AddSchedule
           </div>
           <div>
             <label className="block mb-1 font-medium">Contact No</label>
-            <Input value={contactNo} onChange={e => setContactNo(e.target.value)} placeholder="Enter contact number" required />
+            <Input value={contactNo} onChange={e => setContactNo(e.target.value)} placeholder="Enter contact number" />
           </div>
           <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white h-10 mt-2 rounded-md font-medium transition-colors" disabled={isSaving}>
             {isSaving ? 'Saving...' : 'Save Appointment'}
