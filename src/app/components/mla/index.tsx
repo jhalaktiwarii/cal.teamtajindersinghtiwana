@@ -16,6 +16,7 @@ import { includesCI } from '@/utils/strings';
 import ListView from '../Calendar/ListView';
 import { toast } from 'sonner';
 import { DeleteModal } from '@/components/modals/DeleteModal';
+import { AppointmentDetails } from '../AppointmentDetails';
 
 export default function MLAView() {
   const { appointments, loading, updateAppointment } = useAppointments();
@@ -31,6 +32,9 @@ export default function MLAView() {
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [deleteModalTitle, setDeleteModalTitle] = useState('');
   const [deleteModalDescription, setDeleteModalDescription] = useState('');
+  
+  // Appointment details modal state
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
   const handleStatusChange = async (id: string, newStatus: 'going' | 'not-going' | 'scheduled') => {
     try {
@@ -39,6 +43,20 @@ export default function MLAView() {
     } catch (error) {
       console.error('Error updating appointment status:', error);
       toast.error('Failed to update appointment status.');
+    }
+  };
+
+  const handleEditAppointment = () => {
+    // For now, just close the modal - edit functionality can be added later
+    setSelectedEvent(null);
+    toast.info('Edit functionality coming soon');
+  };
+
+  const handleDeleteAppointment = () => {
+    if (selectedEvent?.appointment?.id) {
+      // For now, just close the modal - delete functionality can be added later
+      setSelectedEvent(null);
+      toast.info('Delete functionality coming soon');
     }
   };
 
@@ -154,18 +172,39 @@ export default function MLAView() {
 
   const generateAppointmentsPDF = (appointments: CalendarEvent[], options: PDFOptions) => {
     const doc = new jsPDF();
-    doc.setFontSize(24);
-    doc.text(options.title, 10, 20);
-    doc.setFontSize(18);
-    doc.text(options.subtitle, 10, 30);
+    
+    // Add organization header
+    doc.setFontSize(16);
+    doc.text('भारतीय जनता युवा मोर्चा मुंबई', 10, 20);
+    doc.setFontSize(14);
+    doc.text('अध्यक्ष तजिंदर सिंह तिवाना', 10, 30);
+    
+    // Add title and subtitle
+    doc.setFontSize(20);
+    doc.text(options.title, 10, 45);
+    doc.setFontSize(16);
+    doc.text(options.subtitle, 10, 55);
+    
+    // Add appointments
+    let yPosition = 70;
     appointments.forEach((appointment: CalendarEvent, index: number) => {
-      doc.text(`Appointment ${index + 1}`, 10, 40 + index * 20);
-      doc.text(`Program Name: ${appointment.appointment.programName}`, 10, 50 + index * 20);
-      doc.text(`Date: ${format(parseISO(appointment.appointment.startTime), "PPP")}`, 10, 60 + index * 20);
-      doc.text(`Time: ${toMarathiTime(appointment.appointment.startTime)}`, 10, 70 + index * 20);
-      doc.text(`Contact: ${appointment.appointment.contactNo}`, 10, 80 + index * 20);
-      doc.text(`Status: ${appointment.appointment.status}`, 10, 90 + index * 20);
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      
+      doc.setFontSize(12);
+      doc.text(`Appointment ${index + 1}`, 10, yPosition);
+      doc.setFontSize(10);
+      doc.text(`Program Name: ${appointment.appointment.programName}`, 10, yPosition + 8);
+      doc.text(`Date: ${format(parseISO(appointment.appointment.startTime), "PPP")}`, 10, yPosition + 16);
+      doc.text(`Time: ${toMarathiTime(appointment.appointment.startTime)}`, 10, yPosition + 24);
+      doc.text(`Contact: ${appointment.appointment.contactNo}`, 10, yPosition + 32);
+      doc.text(`Status: ${appointment.appointment.status}`, 10, yPosition + 40);
+      
+      yPosition += 55; // Increase spacing between appointments
     });
+    
     return doc;
   };
 
@@ -270,6 +309,7 @@ export default function MLAView() {
                    openDeleteBirthdayModal(id, birthday.fullName);
                  }
                }}
+               onAppointmentClick={setSelectedEvent}
              />
            </div>
          </div>
@@ -284,7 +324,7 @@ export default function MLAView() {
               title: 'Appointments Schedule',
               subtitle: 'Current View',
             });
-            doc.save(`appointments-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+            doc.save(`bjym-mumbai-appointments-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
           }}
         >
           <Download className="h-4 w-4 mr-2" />
@@ -305,6 +345,15 @@ export default function MLAView() {
         onOpenChange={setIsShareDialogOpen}
         events={appointments}
       />
+
+      {selectedEvent && (
+        <AppointmentDetails
+          event={selectedEvent}
+          onEdit={handleEditAppointment}
+          onDelete={handleDeleteAppointment}
+          onClose={() => setSelectedEvent(null)}
+        />
+      )}
 
       <DeleteModal
         open={deleteModalOpen}

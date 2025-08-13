@@ -54,7 +54,7 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
         html2pdf()
           .set({
             margin: 0.1,
-            filename: `schedule-${format(date, 'yyyy-MM-dd')}.pdf`,
+            filename: `bjym-mumbai-schedule-${format(date, 'yyyy-MM-dd')}.pdf`,
             html2canvas: { scale: 2 },
             jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
           })
@@ -237,7 +237,7 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
   const handleDownloadDocx = async () => {
     try {
       await generateAppointmentsDocx(events, {
-        personName: 'माननीय आमदार संजय उपाध्याय जी',
+        personName: 'भारतीय जनता युवा मोर्चा मुंबई अध्यक्ष तजिंदर सिंह तिवाना',
       });
       toast.success('Marathi Schedule DOCX downloaded successfully');
     } catch (error) {
@@ -286,7 +286,7 @@ export function FullPageSchedule({ date, onClose, events: initialEvents, onAddSc
               {/* Title row */}
               <tr>
                 <td colSpan={4} style={{ padding: '8px', fontWeight: 700, textAlign: 'center', wordBreak: 'break-word', border: '1px solid #333', fontSize: '18px', background: '#fff' }}>
-                  माननीय आमदार संजय उपाध्याय जी यांचे कार्यक्रम
+                  भारतीय जनता युवा मोर्चा मुंबई अध्यक्ष तजिंदर सिंह तिवाना यांचे कार्यक्रम
                 </td>
               </tr>
               {/* Date row */}

@@ -19,6 +19,7 @@ interface ListViewProps {
   selectedFilter?: string;
   onFilterChange?: (filter: string) => void;
   onDeleteBirthday?: (id: string) => void;
+  onAppointmentClick?: (event: CalendarEvent) => void;
 }
 
 export default function ListView({ 
@@ -30,7 +31,8 @@ export default function ListView({
   searchQuery = "",
   selectedFilter = "all",
   onFilterChange,
-  onDeleteBirthday
+  onDeleteBirthday,
+  onAppointmentClick
 }: ListViewProps) {
   const pager = useDatePager(new Date());
 
@@ -125,6 +127,7 @@ export default function ListView({
                   item={item} 
                   role={role} 
                   onStatusChange={onStatusChange}
+                  onClick={() => onAppointmentClick?.(item)}
                 />
               : <BirthdayCard 
                   key={item.id || `birthday-${Math.random()}`} 

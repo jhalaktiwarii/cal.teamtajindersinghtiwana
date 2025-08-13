@@ -2,6 +2,7 @@ import React from "react";
 import { CheckCircle2, XCircle, Clock3, AlertTriangle } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { CompactApprovalButtons } from "@/components/ui/approval-buttons";
 import { cn } from "@/lib/utils";
 import { CalendarEvent } from "@/app/types";
 
@@ -9,9 +10,10 @@ interface AppointmentCardProps {
   item: CalendarEvent;
   role: "staff" | "mla";
   onStatusChange: (id: string, status: 'going' | 'not-going' | 'scheduled') => void;
+  onClick?: () => void;
 }
 
-export function AppointmentCard({ item, role, onStatusChange }: AppointmentCardProps) {
+export function AppointmentCard({ item, role, onStatusChange, onClick }: AppointmentCardProps) {
   const appointment = item.appointment;
   
   const getStatusColor = (status: string) => {
@@ -54,10 +56,14 @@ export function AppointmentCard({ item, role, onStatusChange }: AppointmentCardP
   };
 
   return (
-    <article className={cn(
-      "group rounded-xl border bg-white px-3 xs:px-4 py-2 xs:py-3 shadow-sm hover:shadow-md transition-all duration-200",
-      getBackgroundColor(appointment?.status || 'scheduled', appointment?.isUrgent || false)
-    )}>
+    <article 
+      className={cn(
+        "group rounded-xl border bg-white px-3 xs:px-4 py-2 xs:py-3 shadow-sm hover:shadow-md transition-all duration-200",
+        getBackgroundColor(appointment?.status || 'scheduled', appointment?.isUrgent || false),
+        onClick && "cursor-pointer"
+      )}
+      onClick={onClick}
+    >
       <div className="flex items-center justify-between gap-2 xs:gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center space-x-2">
@@ -87,7 +93,7 @@ export function AppointmentCard({ item, role, onStatusChange }: AppointmentCardP
           </div>
         </div>
 
-        <div className="flex items-center gap-1 xs:gap-2">
+        <div className="flex items-center gap-2 xs:gap-3">
           {/* Role-aware actions */}
           {role === "staff" && (
             <div className="flex items-center gap-1">
@@ -139,62 +145,27 @@ export function AppointmentCard({ item, role, onStatusChange }: AppointmentCardP
           )}
 
           {role === "mla" && (
-            <div className="flex items-center gap-1">
-              {appointment?.status === 'scheduled' && (
-                <>
-                  <Button 
-                    size="sm" 
-                    variant="ghost" 
-                    onClick={() => appointment?.id && onStatusChange(appointment.id, 'going')}
-                    className="h-5 w-5 xs:h-6 xs:w-6 p-0 hover:bg-emerald-100"
-                    title="Approve"
-                  >
-                    <CheckCircle2 className="h-3 w-3 xs:h-4 xs:w-4 text-emerald-600" />
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="ghost" 
-                    onClick={() => appointment?.id && onStatusChange(appointment.id, 'not-going')}
-                    className="h-5 w-5 xs:h-6 xs:w-6 p-0 hover:bg-red-100"
-                    title="Decline"
-                  >
-                    <XCircle className="h-3 w-3 xs:h-4 xs:w-4 text-red-600" />
-                  </Button>
-                </>
-              )}
-              {appointment?.status === 'going' && (
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
-                  onClick={() => appointment?.id && onStatusChange(appointment.id, 'not-going')}
-                  className="h-5 w-5 xs:h-6 xs:w-6 p-0 hover:bg-red-100"
-                  title="Decline"
-                >
-                  <XCircle className="h-3 w-3 xs:h-4 xs:w-4 text-red-600" />
-                </Button>
-              )}
-              {appointment?.status === 'not-going' && (
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
-                  onClick={() => appointment?.id && onStatusChange(appointment.id, 'going')}
-                  className="h-5 w-5 xs:h-6 xs:w-6 p-0 hover:bg-emerald-100"
-                  title="Approve"
-                >
-                  <CheckCircle2 className="h-3 w-3 xs:h-4 xs:w-4 text-emerald-600" />
-                </Button>
-              )}
+            <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
+              <CompactApprovalButtons
+                onApprove={() => appointment?.id && onStatusChange(appointment.id, 'going')}
+                onDecline={() => appointment?.id && onStatusChange(appointment.id, 'not-going')}
+                currentStatus={appointment?.status as 'scheduled' | 'going' | 'not-going'}
+              />
             </div>
           )}
           
-          {/* Status chip */}
-          <span className={cn(
-            "inline-flex items-center px-1.5 xs:px-2 py-0.5 xs:py-1 rounded-full text-xs font-medium whitespace-nowrap border",
-            getStatusColor(appointment?.status ?? 'scheduled')
-          )}>
-            {(appointment?.status ?? 'Scheduled').charAt(0).toUpperCase() + 
-             (appointment?.status ?? 'scheduled').slice(1)}
-          </span>
+          {/* Status chip - only show for staff view since MLA view shows status in approval buttons */}
+          {role === "staff" && (
+            <div className="ml-3">
+              <span className={cn(
+                "inline-flex items-center px-1.5 xs:px-2 py-0.5 xs:py-1 rounded-full text-xs font-medium whitespace-nowrap border",
+                getStatusColor(appointment?.status ?? 'scheduled')
+              )}>
+                {(appointment?.status ?? 'Scheduled').charAt(0).toUpperCase() + 
+                 (appointment?.status ?? 'scheduled').slice(1)}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </article>

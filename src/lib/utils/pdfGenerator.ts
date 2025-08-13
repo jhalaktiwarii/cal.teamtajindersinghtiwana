@@ -14,7 +14,7 @@ export interface PDFGeneratorOptions {
 
 export const generateAppointmentsDocx = async (events: CalendarEvent[], options: PDFGeneratorOptions = {}) => {
   const {
-    personName = 'माननीय आमदार संजय उपाध्याय जी'
+    personName = 'भारतीय जनता युवा मोर्चा मुंबई अध्यक्ष तजिंदर सिंह तिवाना'
   } = options;
   
   const filteredEvents = events;
@@ -203,5 +203,5 @@ export const generateAppointmentsDocx = async (events: CalendarEvent[], options:
   });
 
   const blob = await Packer.toBlob(doc);
-  saveAs(blob, 'marathi-schedule.docx');
+  saveAs(blob, 'bjym-mumbai-schedule.docx');
 };
