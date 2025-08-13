@@ -315,10 +315,10 @@ export default function BJYMView() {
          </div>
        </main>
       {/* Export and Share Buttons */}
-      <div className="fixed bottom-4 left-4 flex gap-2">
+      <div className="fixed bottom-4 left-2 sm:left-4 flex flex-col xs:flex-row gap-2 xs:gap-3 z-50">
         <Button
           variant="outline"
-          className="bg-white"
+          className="bg-white shadow-lg text-sm xs:text-base px-4 xs:px-6 py-3 xs:py-4 h-12 xs:h-14"
           onClick={() => {
             const doc = generateAppointmentsPDF(appointments, {
               title: 'Appointments Schedule',
@@ -327,16 +327,16 @@ export default function BJYMView() {
             doc.save(`bjym-mumbai-appointments-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
           }}
         >
-          <Download className="h-4 w-4 mr-2" />
-          Export
+          <Download className="h-5 w-5 xs:h-6 xs:w-6 mr-2 xs:mr-3" />
+          <span className="font-semibold">Export</span>
         </Button>
         <Button
           variant="outline"
-          className="bg-white"
+          className="bg-white shadow-lg text-sm xs:text-base px-4 xs:px-6 py-3 xs:py-4 h-12 xs:h-14"
           onClick={() => setIsShareDialogOpen(true)}
         >
-          <Share2 className="h-4 w-4 mr-2" />
-          Share
+          <Share2 className="h-5 w-5 xs:h-6 xs:w-6 mr-2 xs:mr-3" />
+          <span className="font-semibold">Share</span>
         </Button>
       </div>
 

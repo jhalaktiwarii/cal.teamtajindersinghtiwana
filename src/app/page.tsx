@@ -24,11 +24,11 @@ function AppContent() {
       {isBJYM ? <BJYMView /> : <PAView appointments={appointments} saveAppointment={saveAppointment} updateAppointment={updateAppointment} deleteAppointment={deleteAppointment} />}
       {/* Floating Create Button */}
       <button
-        className="fixed bottom-8 right-8 z-[70] w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
+        className="fixed bottom-4 xs:bottom-8 right-4 xs:right-8 z-[70] w-12 h-12 xs:w-14 xs:h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
         onClick={() => setShowCreate(true)}
         aria-label="Create Event"
       >
-        <Plus className="w-8 h-8 text-white" />
+        <Plus className="w-6 h-6 xs:w-8 xs:h-8 text-white" />
       </button>
       {/* Create Dialog */}
       {showCreate && (

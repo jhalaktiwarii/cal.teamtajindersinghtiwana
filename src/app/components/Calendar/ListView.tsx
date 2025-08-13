@@ -97,6 +97,7 @@ export default function ListView({
           onPrev={pager.goPrev}
           onNext={pager.goNext}
           onPick={pager.pick}
+          onGoToDate={pager.goToDate}
         />
       </div>
 

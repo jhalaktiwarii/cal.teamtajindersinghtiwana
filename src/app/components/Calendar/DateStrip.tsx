@@ -12,12 +12,14 @@ export function DateStrip({
   onPrev,
   onNext,
   onPick,
+  onGoToDate,
 }: {
   active: Date;
   direction: 1 | -1 | 0;
   onPrev: () => void;
   onNext: () => void;
   onPick: (d: Date) => void;
+  onGoToDate?: (date: Date) => void;
 }) {
   // 7-day window centered on active (3 days before, active, 3 days after)
   const days = [
@@ -35,6 +37,7 @@ export function DateStrip({
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [currentX, setCurrentX] = useState(0);
+  const [swipeOffset, setSwipeOffset] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -45,29 +48,44 @@ export function DateStrip({
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (!isDragging) return;
-    setCurrentX(e.touches[0].clientX);
-  }, [isDragging]);
+    const newX = e.touches[0].clientX;
+    setCurrentX(newX);
+    
+    // Calculate swipe offset for visual feedback
+    const diff = startX - newX;
+    const maxOffset = 100; // Maximum visual offset
+    const clampedOffset = Math.max(-maxOffset, Math.min(maxOffset, diff));
+    setSwipeOffset(clampedOffset);
+  }, [isDragging, startX]);
 
   const handleTouchEnd = useCallback(() => {
     if (!isDragging) return;
     
     const diff = startX - currentX;
-    const threshold = 50; // minimum swipe distance
+    const threshold = 30; // Lower threshold for more responsive swiping
+    const dayWidth = 40; // Approximate width of each day button
     
-    if (Math.abs(diff) > threshold) {
+    if (Math.abs(diff) > threshold && onGoToDate) {
+      // Calculate how many days to move based on swipe distance
+      const daysToMove = Math.round(Math.abs(diff) / dayWidth);
+      const actualDaysToMove = Math.min(daysToMove, 7); // Cap at 7 days max
+      
       if (diff > 0) {
-        // Swipe left - go to next day
-        onNext();
+        // Swipe left - go forward in time
+        const targetDate = addDays(active, actualDaysToMove);
+        onGoToDate(targetDate);
       } else {
-        // Swipe right - go to previous day
-        onPrev();
+        // Swipe right - go backward in time
+        const targetDate = addDays(active, -actualDaysToMove);
+        onGoToDate(targetDate);
       }
     }
     
     setIsDragging(false);
     setStartX(0);
     setCurrentX(0);
-  }, [isDragging, startX, currentX, onNext, onPrev]);
+    setSwipeOffset(0);
+  }, [isDragging, startX, currentX, onGoToDate, active]);
 
   // Mouse drag functionality for desktop
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -78,29 +96,44 @@ export function DateStrip({
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isDragging) return;
-    setCurrentX(e.clientX);
-  }, [isDragging]);
+    const newX = e.clientX;
+    setCurrentX(newX);
+    
+    // Calculate swipe offset for visual feedback
+    const diff = startX - newX;
+    const maxOffset = 100; // Maximum visual offset
+    const clampedOffset = Math.max(-maxOffset, Math.min(maxOffset, diff));
+    setSwipeOffset(clampedOffset);
+  }, [isDragging, startX]);
 
   const handleMouseUp = useCallback(() => {
     if (!isDragging) return;
     
     const diff = startX - currentX;
-    const threshold = 50; // minimum drag distance
+    const threshold = 30; // Lower threshold for more responsive swiping
+    const dayWidth = 40; // Approximate width of each day button
     
-    if (Math.abs(diff) > threshold) {
+    if (Math.abs(diff) > threshold && onGoToDate) {
+      // Calculate how many days to move based on drag distance
+      const daysToMove = Math.round(Math.abs(diff) / dayWidth);
+      const actualDaysToMove = Math.min(daysToMove, 7); // Cap at 7 days max
+      
       if (diff > 0) {
-        // Drag left - go to next day
-        onNext();
+        // Drag left - go forward in time
+        const targetDate = addDays(active, actualDaysToMove);
+        onGoToDate(targetDate);
       } else {
-        // Drag right - go to previous day
-        onPrev();
+        // Drag right - go backward in time
+        const targetDate = addDays(active, -actualDaysToMove);
+        onGoToDate(targetDate);
       }
     }
     
     setIsDragging(false);
     setStartX(0);
     setCurrentX(0);
-  }, [isDragging, startX, currentX, onNext, onPrev]);
+    setSwipeOffset(0);
+  }, [isDragging, startX, currentX, onGoToDate, active]);
 
   const variants = {
     enter: (dir: 1 | -1 | 0) => ({ x: dir === 0 ? 0 : dir * 40, opacity: 0 }),
@@ -154,6 +187,10 @@ export function DateStrip({
                 exit="exit"
                 transition={{ type: "spring", stiffness: 400, damping: 35, mass: 0.6 }}
                 className="grid h-16 w-full grid-cols-7 gap-0.5 xs:gap-1 sm:gap-2 md:gap-3"
+                style={{
+                  transform: isDragging ? `translateX(${swipeOffset}px)` : 'translateX(0)',
+                  transition: isDragging ? 'none' : 'transform 0.2s ease-out'
+                }}
               >
                 {days.map((d) => {
                   const sel = isSameDay(d, active);

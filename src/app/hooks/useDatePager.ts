@@ -17,6 +17,7 @@ export function useDatePager(initial: Date = new Date()) {
   const goPrev = () => go(addDays(active, -1));
   const goNext = () => go(addDays(active, 1));
   const pick = (d: Date) => go(d);
+  const goToDate = (targetDate: Date) => go(targetDate);
 
   return {
     active,
@@ -25,5 +26,6 @@ export function useDatePager(initial: Date = new Date()) {
     goPrev,
     goNext,
     pick,
+    goToDate,
   };
 } 
