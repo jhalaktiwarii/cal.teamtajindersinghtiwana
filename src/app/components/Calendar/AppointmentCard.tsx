@@ -58,13 +58,13 @@ export function AppointmentCard({ item, role, onStatusChange, onClick }: Appoint
   return (
     <article 
       className={cn(
-        "group rounded-xl border bg-white px-3 xs:px-4 py-2 xs:py-3 shadow-sm hover:shadow-md transition-all duration-200",
+        "group rounded-xl border bg-white px-2 xs:px-3 sm:px-4 py-1.5 xs:py-2 sm:py-3 shadow-sm hover:shadow-md transition-all duration-200",
         getBackgroundColor(appointment?.status || 'scheduled', appointment?.isUrgent || false),
         onClick && "cursor-pointer"
       )}
       onClick={onClick}
     >
-      <div className="flex items-center justify-between gap-2 xs:gap-3">
+      <div className="flex items-center justify-between gap-1.5 xs:gap-2 sm:gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center space-x-2">
             <h3 className={cn(
@@ -93,7 +93,7 @@ export function AppointmentCard({ item, role, onStatusChange, onClick }: Appoint
           </div>
         </div>
 
-        <div className="flex items-center gap-2 xs:gap-3">
+        <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3">
           {/* Role-aware actions */}
           {role === "staff" && (
             <div className="flex items-center gap-1">

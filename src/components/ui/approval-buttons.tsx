@@ -168,14 +168,14 @@ export function CompactApprovalButtons({
   currentStatus?: 'scheduled' | 'going' | 'not-going';
 }) {
   return (
-    <div className={cn("flex items-center gap-4", className)}>
+    <div className={cn("flex flex-col xs:flex-row items-center gap-2 xs:gap-3 sm:gap-4", className)}>
       {/* Approve Button - Show for scheduled and not-going, hide for going */}
       {(currentStatus === 'scheduled' || currentStatus === 'not-going') && (
         <button
           onClick={onApprove}
           disabled={disabled}
           className={cn(
-            "inline-flex items-center gap-2 px-3.5 py-2 rounded-md font-bold text-white text-xs",
+            "inline-flex items-center gap-1.5 xs:gap-2 px-2.5 xs:px-3 sm:px-3.5 py-1.5 xs:py-2 rounded-md font-bold text-white text-xs",
             "bg-gradient-to-r from-orange-500 via-orange-400 to-amber-500 border border-orange-600",
             "shadow-sm hover:shadow-lg transition-all duration-200",
             "hover:from-orange-400 hover:via-orange-300 hover:to-amber-400 hover:border-orange-500",
@@ -186,7 +186,7 @@ export function CompactApprovalButtons({
           )}
           title="Approve Appointment"
         >
-          <CheckCircle className="h-4 w-4" strokeWidth={2.5} />
+          <CheckCircle className="h-3.5 w-3.5 xs:h-4 xs:w-4" strokeWidth={2.5} />
           <span>Approve</span>
         </button>
       )}
@@ -194,12 +194,13 @@ export function CompactApprovalButtons({
       {/* Approved State - Show when status is going */}
       {currentStatus === 'going' && (
         <div className={cn(
-          "inline-flex items-center gap-2 px-3.5 py-2 rounded-md font-bold text-xs",
+          "inline-flex items-center gap-1.5 xs:gap-2 px-2.5 xs:px-3 sm:px-3.5 py-1.5 xs:py-2 rounded-md font-bold text-xs",
           "bg-gradient-to-r from-green-500 to-emerald-600 border border-green-600",
           "text-white shadow-sm opacity-90 cursor-not-allowed"
         )}>
-          <CheckCircle className="h-4 w-4" strokeWidth={2.5} />
-          <span> Approved – Going</span>
+          <CheckCircle className="h-3.5 w-3.5 xs:h-4 xs:w-4" strokeWidth={2.5} />
+          <span className="hidden xs:inline">Approved – Going</span>
+          <span className="xs:hidden">Approved</span>
         </div>
       )}
       
@@ -209,7 +210,7 @@ export function CompactApprovalButtons({
           onClick={onDecline}
           disabled={disabled}
           className={cn(
-            "inline-flex items-center gap-2 px-3.5 py-2 rounded-md font-bold text-white text-xs",
+            "inline-flex items-center gap-1.5 xs:gap-2 px-2.5 xs:px-3 sm:px-3.5 py-1.5 xs:py-2 rounded-md font-bold text-white text-xs",
             "bg-gradient-to-r from-red-600 via-red-500 to-red-700 border border-red-700",
             "shadow-md hover:shadow-lg transition-all duration-200",
             "hover:from-red-500 hover:via-red-400 hover:to-red-600 hover:border-red-600",
@@ -220,20 +221,22 @@ export function CompactApprovalButtons({
           )}
           title="Reject Appointment"
         >
-          <XCircleIcon className="h-4 w-4" strokeWidth={2.5} />
-          <span>Reject</span>
+          <XCircleIcon className="h-3.5 w-3.5 xs:h-4 xs:w-4" strokeWidth={2.5} />
+          <span className="hidden xs:inline">Reject</span>
+          <span className="xs:hidden">Reject</span>
         </button>
       )}
 
       {/* Rejected State - Show when status is not-going */}
       {currentStatus === 'not-going' && (
         <div className={cn(
-          "inline-flex items-center gap-2 px-3.5 py-2 rounded-md font-bold text-xs",
+          "inline-flex items-center gap-1.5 xs:gap-2 px-2.5 xs:px-3 sm:px-3.5 py-1.5 xs:py-2 rounded-md font-bold text-xs",
           "bg-gradient-to-r from-red-500 to-red-600 border border-red-600",
           "text-white shadow-sm opacity-90 cursor-not-allowed"
         )}>
-          <XCircleIcon className="h-4 w-4" strokeWidth={2.5} />
-          <span>Rejected – Not Going</span>
+          <XCircleIcon className="h-3.5 w-3.5 xs:h-4 xs:w-4" strokeWidth={2.5} />
+          <span className="hidden xs:inline">Rejected – Not Going</span>
+          <span className="xs:hidden">Rejected</span>
         </div>
       )}
     </div>

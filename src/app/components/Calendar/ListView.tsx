@@ -102,13 +102,13 @@ export default function ListView({
 
       {/* Appointment Filters - positioned below date slider */}
       {view === 'appointments' && (
-        <div className="flex flex-wrap gap-1 sm:gap-2 mb-4 sm:mb-6 justify-center flex-shrink-0">
+        <div className="flex flex-wrap gap-1 sm:gap-2 mb-3 sm:mb-4 md:mb-6 justify-center flex-shrink-0 px-2">
           {['all', 'going', 'not-going', 'scheduled'].map((filter) => (
             <Button
               key={filter}
               variant={selectedFilter === filter ? "default" : "outline"}
               onClick={() => onFilterChange?.(filter)}
-              className="text-xs sm:text-sm px-2 sm:px-4 h-8 sm:h-10"
+              className="text-xs sm:text-sm px-1.5 sm:px-3 md:px-4 h-7 sm:h-8 md:h-10"
             >
               {filter.charAt(0).toUpperCase() + filter.slice(1).replace('-', ' ')}
             </Button>
