@@ -36,7 +36,7 @@ export function ShareDialog({ events, isOpen, onOpenChange }: ShareDialogProps) 
     }, {} as Record<string, CalendarEvent[]>);
 
     // Format text with sections
-    let text = "📅 *Appointments*\n\n";
+    let text = "*Appointments*\n\n";
 
     Object.entries(groupedEvents).forEach(([date, dateEvents]) => {
       text += `*${date}*\n`;
