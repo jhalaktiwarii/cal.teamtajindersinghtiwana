@@ -114,7 +114,7 @@ export function AppointmentModal({
         contactNo: values.contactNo || undefined,
         status: appointment?.status || 'scheduled',
         isUrgent: values.isUrgent,
-        userid: values.contactNo || appointment?.userid || '',
+        userid: appointment?.userid || 'default',
       });
       onClose();
       form.reset();

@@ -232,8 +232,7 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
             !appointmentData.address || 
             !appointmentData.startTime || 
             !appointmentData.status || 
-            !appointmentData.eventFrom || 
-            !appointmentData.contactNo ||
+            !appointmentData.eventFrom ||
             appointmentData.isUrgent === undefined) {
           throw new Error('Missing required fields for appointment');
         }
