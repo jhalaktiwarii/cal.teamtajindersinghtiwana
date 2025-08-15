@@ -101,7 +101,7 @@ export function Sidebar({
   }, [session?.user?.role, isMobile, setIsSidebarOpen]);
 
   const filterAppointments = useCallback((appointments: CalendarEvent[], status: AppointmentStatus, time: TimeFilter) => {
-    return appointments.filter(event => {
+    const filtered = appointments.filter(event => {
       const appointmentDate = new Date(event.appointment.startTime);
       const now = new Date();
       const selectedDateStart = selectedDate ? startOfDay(selectedDate) : null;
@@ -135,10 +135,17 @@ export function Sidebar({
           return true;
       }
     });
+
+    // Sort appointments by start time (chronological order)
+    return filtered.sort((a, b) => {
+      const timeA = new Date(a.appointment.startTime).getTime();
+      const timeB = new Date(b.appointment.startTime).getTime();
+      return timeA - timeB;
+    });
   }, [selectedDate]);
 
   const filteredAppointments = useMemo(() => {
-    return appointments.filter(event => {
+    const filtered = appointments.filter(event => {
       const appointmentDate = new Date(event.appointment.startTime);
       
       // Search query filter
@@ -163,6 +170,13 @@ export function Sidebar({
       }
 
       return true;
+    });
+
+    // Sort appointments by start time (chronological order)
+    return filtered.sort((a, b) => {
+      const timeA = new Date(a.appointment.startTime).getTime();
+      const timeB = new Date(b.appointment.startTime).getTime();
+      return timeA - timeB;
     });
   }, [appointments, searchQuery, selectedDate, selectedStatus]);
 
