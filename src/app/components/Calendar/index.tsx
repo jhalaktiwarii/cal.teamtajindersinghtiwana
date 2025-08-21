@@ -5,8 +5,6 @@ import { DayView } from './DayView';
 import { YearView } from './YearView';
 import { CalendarHeader } from './CalendarHeader';
 import { CalendarEvent } from '../../types';
-import { BirthdayView } from '../BirthdayView';
-import type { Birthday } from '../../types/birthday';
 
 interface CalendarViewProps {
   viewMode: string;
@@ -19,15 +17,10 @@ interface CalendarViewProps {
   onAddAppointment: (date: Date, time?: string) => void;
   onDayDoubleClick: (date: Date, time?: string) => void;
   onDateChange: (date: Date) => void;
-  birthdays: Birthday[];
-  onSaveBirthday: (bday: Birthday) => void;
-  onDeleteBirthday: (id: string) => void;
-  onRefreshBirthdays?: () => void;
-  isSidebarOpen?: boolean;
 }
 
 // Only these views can be changed by swiping
-const swipeableViewModes: (string)[] = ['day', 'week', 'month', 'year'];
+const swipeableViewModes = ['day', 'week', 'month', 'year'] as const;
 
 export function CalendarView({
   viewMode,
@@ -39,13 +32,7 @@ export function CalendarView({
   onViewModeChange,
   onAddAppointment,
   onDayDoubleClick,
-  birthdays,
-  onSaveBirthday,
-  onDeleteBirthday,
-  onRefreshBirthdays,
   onDateChange,
-  isSidebarOpen,
-
 }: CalendarViewProps) {
   // Swipe gesture support
   const touchStartX = useRef<number | null>(null);
@@ -60,9 +47,9 @@ export function CalendarView({
     if (touchStartX.current !== null && touchEndX.current !== null) {
       const diff = touchEndX.current - touchStartX.current;
       if (Math.abs(diff) > 50) { // threshold
-        // Only allow swiping if we're in a swipeable view (not birthday)
-        if (swipeableViewModes.includes(viewMode)) {
-          const currentIdx = swipeableViewModes.indexOf(viewMode);
+        // Only allow swiping if we're in a swipeable view
+        if (swipeableViewModes.includes(viewMode as typeof swipeableViewModes[number])) {
+          const currentIdx = swipeableViewModes.indexOf(viewMode as typeof swipeableViewModes[number]);
           if (diff < 0) {
             // Swipe left: next view
             const nextIdx = (currentIdx + 1) % swipeableViewModes.length;
@@ -123,21 +110,12 @@ export function CalendarView({
         onPrevious={onPrevious}
         onNext={onNext}
         onViewModeChange={onViewModeChange}
-        isSidebarOpen={isSidebarOpen}
       />
       <div className="flex-1 min-h-0 overflow-auto w-full thin-scrollbar">
-        {viewMode === 'birthday' ? (
-          <BirthdayView 
-            birthdays={birthdays}
-            onSave={onSaveBirthday}
-            onDelete={onDeleteBirthday}
-            onRefresh={onRefreshBirthdays}
-          />
-        ) : viewMode === 'month' ? (
+        {viewMode === 'month' ? (
           <MonthView
             events={events}
             currentDate={currentDate}
-            onDayDoubleClick={onDayDoubleClick}
             onDayClick={onDateChange}
             onAddAppointment={onAddAppointment}
             onEventClick={onEventClick}
@@ -157,7 +135,6 @@ export function CalendarView({
             currentDate={currentDate}
             onEventClick={onEventClick}
             onDayDoubleClick={onDayDoubleClick}
-            onAddAppointment={onAddAppointment}
           />
         ) : (
           <YearView

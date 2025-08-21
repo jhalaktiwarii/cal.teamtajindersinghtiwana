@@ -124,16 +124,16 @@ export default function ListView({
           renderItem={(item) =>
             view === "appointments"
               ? <AppointmentCard 
-                  key={item.appointment?.id || `appointment-${Math.random()}`} 
-                  item={item} 
+                  key={(item as CalendarEvent).appointment?.id || `appointment-${Math.random()}`} 
+                  item={item as CalendarEvent} 
                   role={role} 
                   onStatusChange={onStatusChange}
-                  onClick={() => onAppointmentClick?.(item)}
+                  onClick={() => onAppointmentClick?.(item as CalendarEvent)}
                 />
               : <BirthdayCard 
-                  key={item.id || `birthday-${Math.random()}`} 
-                  item={item} 
-                  role={role} 
+                  key={(item as Birthday).id || `birthday-${Math.random()}`} 
+                  item={item as Birthday} 
+                  onDelete={onDeleteBirthday}
                 />
           }
         />

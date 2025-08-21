@@ -21,9 +21,6 @@ export function useCalendar() {
         case 'year':
           newDate.setFullYear(prev.getFullYear() + 1);
           break;
-        case 'birthday':
-          // Birthday view doesn't need date navigation
-          return prev;
       }
       return newDate;
     });
@@ -45,9 +42,6 @@ export function useCalendar() {
         case 'year':
           newDate.setFullYear(prev.getFullYear() - 1);
           break;
-        case 'birthday':
-          // Birthday view doesn't need date navigation
-          return prev;
       }
       return newDate;
     });

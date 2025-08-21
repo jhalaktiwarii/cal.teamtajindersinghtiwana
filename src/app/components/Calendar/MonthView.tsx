@@ -5,7 +5,6 @@ import { DayCell } from './DayCell';
 interface MonthViewProps {
   events: CalendarEvent[];
   currentDate: Date;
-  onDayDoubleClick: (date: Date, time?: string) => void;
   onDayClick?: (date: Date) => void;
   onAddAppointment?: (date: Date, time?: string) => void;
   onEventClick?: (event: CalendarEvent) => void;
@@ -15,7 +14,6 @@ interface MonthGridProps {
   date: Date;
   currentDate: Date;
   events: CalendarEvent[];
-  onDayDoubleClick: (date: Date, time?: string) => void;
   onDayClick?: (date: Date) => void;
   onEventClick?: (event: CalendarEvent) => void;
 }
@@ -24,7 +22,6 @@ const MonthGrid: React.FC<MonthGridProps> = ({
   date,
   currentDate,
   events,
-  onDayDoubleClick,
   onDayClick,
   onEventClick,
 }) => {
@@ -117,7 +114,6 @@ const MonthGrid: React.FC<MonthGridProps> = ({
 export function MonthView({ 
   events, 
   currentDate, 
-  onDayDoubleClick,
   onDayClick,
   onEventClick,
 }: MonthViewProps) {
@@ -127,7 +123,6 @@ export function MonthView({
         date={currentDate}
         currentDate={currentDate}
         events={events}
-        onDayDoubleClick={onDayDoubleClick}
         onDayClick={onDayClick}
         onEventClick={onEventClick}
       />

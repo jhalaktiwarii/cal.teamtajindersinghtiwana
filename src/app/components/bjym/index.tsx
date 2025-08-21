@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAppointments } from '@/app/hooks/useAppointments';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { format, startOfToday, parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { Search, LogOut, X, Download, Share2, Gift } from 'lucide-react';
 import { signOut } from "next-auth/react";
 import { jsPDF } from 'jspdf';
@@ -12,7 +12,7 @@ import { ShareDialog } from '../ShareDialog';
 import { CalendarEvent } from '@/app/types';
 import { toMarathiTime } from '@/app/utils/dateUtils';
 import type { Birthday } from '@/app/types/birthday';
-import { includesCI } from '@/utils/strings';
+
 import ListView from '../Calendar/ListView';
 import { toast } from 'sonner';
 import { DeleteModal } from '@/components/modals/DeleteModal';
@@ -97,46 +97,7 @@ export default function BJYMView() {
     fetchBirthdays();
   }, []);
 
-  const handleSaveBirthday = async (bday: Birthday) => {
-    try {
-      if (bday.id) {
-        // Update existing birthday
-        const res = await fetch(`/api/birthdays/${bday.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(bday),
-        });
-        if (res.ok) {
-          const updated = await res.json();
-          setBirthdays(prev => prev.map(b => b.id === updated.id ? updated : b));
-        }
-      } else {
-        // Create new birthday
-        const res = await fetch('/api/birthdays', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(bday),
-        });
-        if (res.ok) {
-          const newBirthday = await res.json();
-          setBirthdays(prev => [newBirthday, ...prev]);
-        }
-      }
-    } catch (error) {
-      console.error('Error saving birthday:', error);
-    }
-  };
-  
-  const handleDeleteBirthday = async (id: string) => {
-    try {
-      const res = await fetch(`/api/birthdays/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setBirthdays(prev => prev.filter(b => b.id !== id));
-      }
-    } catch (error) {
-      console.error('Error deleting birthday:', error);
-    }
-  };
+
 
   const openDeleteBirthdayModal = (id: string, name: string) => {
     setItemToDelete(id);
@@ -158,7 +119,7 @@ export default function BJYMView() {
       } else {
         throw new Error('Failed to delete birthday');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete birthday');
     } finally {
       setDeleteModalLoading(false);

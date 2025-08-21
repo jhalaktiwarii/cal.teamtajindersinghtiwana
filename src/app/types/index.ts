@@ -18,7 +18,7 @@ export interface Patient {
   name: string;
 }
 
-export type ViewMode = 'day' | 'week' | 'month' | 'year' | 'birthday';
+export type ViewMode = 'day' | 'week' | 'month' | 'year';
 
 export interface CalendarEvent {
   appointment: Appointment;

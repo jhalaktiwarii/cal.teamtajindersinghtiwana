@@ -65,9 +65,29 @@ export async function POST(req: Request) {
   }
   try {
     const body = await req.json();
-    const newBirthday = await createBirthday(body);
+    console.log('Creating birthday with data:', JSON.stringify(body, null, 2));
+    
+    // Validate required fields
+    if (!body.fullName || typeof body.fullName !== 'string') {
+      throw new Error('fullName is required and must be a string');
+    }
+    if (!body.day || typeof body.day !== 'number' || body.day < 1 || body.day > 31) {
+      throw new Error('day is required and must be a number between 1 and 31');
+    }
+    if (!body.month || typeof body.month !== 'number' || body.month < 1 || body.month > 12) {
+      throw new Error('month is required and must be a number between 1 and 12');
+    }
+    if (!body.reminder || typeof body.reminder !== 'string') {
+      throw new Error('reminder is required and must be a string');
+    }
+    
+    // Check if this is a bulk import (skip duplicate checking to avoid throttling)
+    const isBulkImport = body.skipDuplicateCheck === true;
+    
+    const newBirthday = await createBirthday(body, isBulkImport);
     return NextResponse.json(newBirthday);
   } catch (error) {
+    console.error('POST /api/birthdays - Error:', error);
     return new NextResponse(
       JSON.stringify({ error: "Failed to create birthday", details: error instanceof Error ? error.message : String(error) }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }

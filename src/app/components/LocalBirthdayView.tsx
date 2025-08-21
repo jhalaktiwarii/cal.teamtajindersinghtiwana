@@ -87,14 +87,7 @@ export function LocalBirthdayView() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteBirthday(id);
-      toast.success('Birthday deleted successfully');
-    } catch {
-      toast.error('Failed to delete birthday');
-    }
-  };
+
 
   const openDeleteModal = (id: string, name: string) => {
     setItemToDelete(id);
@@ -111,7 +104,7 @@ export function LocalBirthdayView() {
       await deleteBirthday(itemToDelete);
       toast.success('Birthday deleted successfully');
       setDeleteModalOpen(false);
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete birthday');
     } finally {
       setDeleteModalLoading(false);

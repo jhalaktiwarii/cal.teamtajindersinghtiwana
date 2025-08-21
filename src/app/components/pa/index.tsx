@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { format } from 'date-fns';
@@ -13,9 +13,9 @@ import { CalendarView } from '../Calendar';
 import { FullPageSchedule } from '../Calendar/FullSchedule';
 import { AppointmentDetails } from '../AppointmentDetails';
 import { AppointmentModal } from '../AppointmentModal';
-import type { Birthday } from '@/app/types/birthday';
 import { DeleteModal } from '@/components/modals/DeleteModal';
 import BirthdayModal from '@/components/BirthdayModal';
+import type { Birthday } from '@/app/types/birthday';
 
 interface PAViewProps {
   appointments: CalendarEvent[];
@@ -40,12 +40,12 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedAppointmentDate, setSelectedAppointmentDate] = useState<Date>(new Date());
   const [isEditing, setIsEditing] = useState(false);
-  const [isBirthdayModalOpen, setIsBirthdayModalOpen] = useState(false);
-  const [selectedBirthday, setSelectedBirthday] = useState<Birthday | null>(null);
   const [showFullSchedule, setShowFullSchedule] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [birthdays, setBirthdays] = useState<Birthday[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [birthdays, setBirthdays] = useState<Birthday[]>([]);
+  const [isBirthdayModalOpen, setIsBirthdayModalOpen] = useState(false);
+  const [selectedBirthday, setSelectedBirthday] = useState<Birthday | null>(null);
   
   // Delete modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -53,7 +53,6 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [deleteModalTitle, setDeleteModalTitle] = useState('');
   const [deleteModalDescription, setDeleteModalDescription] = useState('');
-  const [deleteType, setDeleteType] = useState<'appointment' | 'birthday'>('appointment');
 
   // Error boundary effect
   useEffect(() => {
@@ -76,6 +75,17 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
     };
   }, []);
 
+
+
+  // Ensure sidebar is closed when switching to mobile
+  useEffect(() => {
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    } else {
+      setIsSidebarOpen(true);
+    }
+  }, [isMobile]);
+
   const fetchBirthdays = async () => {
     try {
       console.log('Fetching birthdays...');
@@ -88,7 +98,7 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
       console.log('Raw birthday data:', data);
       
       // Filter out any invalid birthday records to prevent crashes
-      const validBirthdays = data.filter((birthday: import('@/app/types/birthday').Birthday, index: number) => {
+      const validBirthdays = data.filter((birthday: Birthday, index: number) => {
         try {
           console.log(`Validating birthday ${index}:`, birthday);
           
@@ -124,17 +134,81 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
     fetchBirthdays();
   }, []);
 
-  // Ensure sidebar is closed when switching to mobile
-  useEffect(() => {
-    if (isMobile) {
-      setIsSidebarOpen(false);
-    } else {
-      setIsSidebarOpen(true);
+  // Birthday handlers
+  const handleEditBirthday = (birthday: Birthday) => {
+    setSelectedBirthday(birthday);
+    setIsBirthdayModalOpen(true);
+  };
+
+  const handleSaveBirthday = async (bday: Birthday) => {
+    try {
+      if (bday.id) {
+        // Update existing
+        const res = await fetch(`/api/birthdays/${bday.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bday),
+        });
+        if (res.ok) {
+          const updated = await res.json();
+          setBirthdays(prev => prev.map(b => b.id === updated.id ? updated : b));
+          toast.success('Birthday updated successfully');
+        } else {
+          throw new Error('Failed to update birthday');
+        }
+      } else {
+        // Create new
+        const res = await fetch('/api/birthdays', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bday),
+        });
+        if (res.ok) {
+          const created = await res.json();
+          // Add to the beginning of the list
+          setBirthdays(prev => [created, ...prev]);
+          toast.success('Birthday added successfully');
+        } else {
+          throw new Error('Failed to create birthday');
+        }
+      }
+      setIsBirthdayModalOpen(false);
+      setSelectedBirthday(null);
+      
+      // Small delay to ensure state is updated before refreshing
+      setTimeout(async () => {
+        await fetchBirthdays();
+      }, 100);
+    } catch (error) {
+      console.error('Error saving birthday:', error);
+      toast.error('Failed to save birthday');
     }
-  }, [isMobile]);
+  };
+  
+  const handleDeleteBirthday = async (id: string) => {
+    try {
+      const res = await fetch(`/api/birthdays/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setBirthdays(prev => prev.filter(b => b.id !== id));
+        toast.success('Birthday deleted successfully');
+        
+        // Refresh birthdays data to ensure UI is in sync
+        await fetchBirthdays();
+      } else {
+        throw new Error('Failed to delete birthday');
+      }
+    } catch (error) {
+      console.error('Error deleting birthday:', error);
+      toast.error('Failed to delete birthday');
+    }
+  };
 
-
-
+  const openDeleteBirthdayModal = (id: string, name: string) => {
+    setItemToDelete(id);
+    setDeleteModalTitle("Delete Birthday?");
+    setDeleteModalDescription(`Are you sure you want to delete "${name}"'s birthday? This action cannot be undone.`);
+    setDeleteModalOpen(true);
+  };
  
   const handleStatusChange = (id: string, status: 'scheduled' | 'going' | 'not-going' ) => {
     const appointment = appointments.find(apt => apt.appointment.id === id);
@@ -277,86 +351,8 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
       setItemToDelete(eventToDelete.appointment.id);
       setDeleteModalTitle("Delete Appointment?");
       setDeleteModalDescription(`Are you sure you want to delete "${eventToDelete.appointment.programName}"? This action cannot be undone.`);
-      setDeleteType('appointment');
       setDeleteModalOpen(true);
     }
-  };
-
-  // Birthday handlers
-  const handleEditBirthday = (birthday: Birthday) => {
-    setSelectedBirthday(birthday);
-    setIsBirthdayModalOpen(true);
-  };
-
-  const handleSaveBirthday = async (bday: Birthday) => {
-    try {
-      if (bday.id) {
-        // Update existing
-        const res = await fetch(`/api/birthdays/${bday.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(bday),
-        });
-        if (res.ok) {
-          const updated = await res.json();
-          setBirthdays(prev => prev.map(b => b.id === updated.id ? updated : b));
-          toast.success('Birthday updated successfully');
-        } else {
-          throw new Error('Failed to update birthday');
-        }
-      } else {
-        // Create new
-        const res = await fetch('/api/birthdays', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(bday),
-        });
-        if (res.ok) {
-          const created = await res.json();
-          // Add to the beginning of the list
-          setBirthdays(prev => [created, ...prev]);
-          toast.success('Birthday added successfully');
-        } else {
-          throw new Error('Failed to create birthday');
-        }
-      }
-      setIsBirthdayModalOpen(false);
-      setSelectedBirthday(null);
-      
-      // Small delay to ensure state is updated before refreshing
-      setTimeout(async () => {
-        await fetchBirthdays();
-      }, 100);
-    } catch (error) {
-      console.error('Error saving birthday:', error);
-      toast.error('Failed to save birthday');
-    }
-  };
-  
-  const handleDeleteBirthday = async (id: string) => {
-    try {
-      const res = await fetch(`/api/birthdays/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setBirthdays(prev => prev.filter(b => b.id !== id));
-        toast.success('Birthday deleted successfully');
-        
-        // Refresh birthdays data to ensure UI is in sync
-        await fetchBirthdays();
-      } else {
-        throw new Error('Failed to delete birthday');
-      }
-    } catch (error) {
-      console.error('Error deleting birthday:', error);
-      toast.error('Failed to delete birthday');
-    }
-  };
-
-  const openDeleteBirthdayModal = (id: string, name: string) => {
-    setItemToDelete(id);
-    setDeleteModalTitle("Delete Birthday?");
-    setDeleteModalDescription(`Are you sure you want to delete "${name}"'s birthday? This action cannot be undone.`);
-    setDeleteType('birthday');
-    setDeleteModalOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
@@ -364,26 +360,15 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
     
     setDeleteModalLoading(true);
     try {
-      if (deleteType === 'appointment') {
-        await deleteAppointment(itemToDelete);
-        setSelectedEvent(null);
-        toast.success('Appointment deleted successfully');
-      } else {
-        // Delete birthday directly here to ensure proper state management
-        const res = await fetch(`/api/birthdays/${itemToDelete}`, { method: 'DELETE' });
-        if (res.ok) {
-          setBirthdays(prev => prev.filter(b => b.id !== itemToDelete));
-          toast.success('Birthday deleted successfully');
-        } else {
-          throw new Error('Failed to delete birthday');
-        }
-      }
+      await deleteAppointment(itemToDelete);
+      setSelectedEvent(null);
+      toast.success('Appointment deleted successfully');
       setDeleteModalOpen(false);
       setItemToDelete(null);
       setDeleteModalTitle('');
       setDeleteModalDescription('');
-    } catch (error) {
-      toast.error('Failed to delete item');
+    } catch {
+      toast.error('Failed to delete appointment');
     } finally {
       setDeleteModalLoading(false);
     }
@@ -429,22 +414,22 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
           {(() => {
             try {
               return (
-                <Sidebar
-                  appointments={appointments}
-                  onStatusChange={handleStatusChange}
-                  onUrgencyChange={handleUrgencyChange}
-                  isDarkMode={false}
-                  setIsSidebarOpen={setIsSidebarOpen}
-                  birthdays={birthdays}
-                  onEditBirthday={handleEditBirthday}
-                  onDeleteBirthday={(id) => {
-                    const birthday = birthdays.find(b => b.id === id);
-                    if (birthday) {
-                      openDeleteBirthdayModal(id, birthday.fullName);
-                    }
-                  }}
-                  onClose={() => setIsSidebarOpen(false)}
-                />
+                          <Sidebar
+            appointments={appointments}
+            onStatusChange={handleStatusChange}
+            onUrgencyChange={handleUrgencyChange}
+            isDarkMode={false}
+            setIsSidebarOpen={setIsSidebarOpen}
+            birthdays={birthdays}
+            onEditBirthday={handleEditBirthday}
+            onDeleteBirthday={(id) => {
+              const birthday = birthdays.find(b => b.id === id);
+              if (birthday) {
+                openDeleteBirthdayModal(id, birthday.fullName);
+              }
+            }}
+            onClose={() => setIsSidebarOpen(false)}
+          />
               );
             } catch (error) {
               console.error('Error rendering Sidebar:', error);
@@ -485,16 +470,6 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
                     setSelectedDate(date);
                     handleOpenFullSchedule(date);
                   }}
-                  birthdays={birthdays}
-                  onSaveBirthday={handleSaveBirthday}
-                  onDeleteBirthday={(id) => {
-                    const birthday = birthdays.find(b => b.id === id);
-                    if (birthday) {
-                      openDeleteBirthdayModal(id, birthday.fullName);
-                    }
-                  }}
-                  onRefreshBirthdays={fetchBirthdays}
-                  isSidebarOpen={!isMobile}
                 />
               );
             } catch (error) {
@@ -600,14 +575,10 @@ export default function PAView({ appointments, saveAppointment, updateAppointmen
           setSelectedBirthday(null);
         }}
         onSave={handleSaveBirthday}
-        onDelete={(id) => {
-          const birthday = birthdays.find(b => b.id === id);
-          if (birthday) {
-            openDeleteBirthdayModal(id, birthday.fullName);
-          }
-        }}
+        onDelete={handleDeleteBirthday}
         initialBirthday={selectedBirthday || undefined}
       />
+
     </div>
   );
 }

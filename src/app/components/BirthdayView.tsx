@@ -7,7 +7,7 @@ import ExcelImportModal from './ExcelImportModal';
 import type { Birthday } from '@/app/types/birthday';
 import { includesCI } from '@/utils/strings';
 
-import { toast } from 'sonner';
+
 
 interface BirthdayViewProps {
   birthdays: Birthday[];

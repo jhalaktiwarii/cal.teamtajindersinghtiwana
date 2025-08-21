@@ -1,7 +1,6 @@
 import React from 'react';
-import { Download, Edit, Trash2, X,  } from 'lucide-react';
+import { Edit, Trash2, X } from 'lucide-react';
 import { CalendarEvent } from '../types';
-import { format } from 'date-fns';
 import { formatTime12Hour } from '@/app/utils/dateUtils';
 
 interface AppointmentDetailsProps {
@@ -12,36 +11,7 @@ interface AppointmentDetailsProps {
 }
 
 export function AppointmentDetails({ event, onEdit, onDelete ,onClose}: AppointmentDetailsProps) {
-  const handleDownload = () => {
-    const appointmentData = {
-      id: event.appointment.id,
-      date: format(new Date(event.appointment.startTime), "PPP"),
-      time: {
-        start: format(new Date(event.appointment.startTime), "h:mm a")
-      },
-      status: event.appointment.status,
-      isUrgent: event.appointment.isUrgent,
-      notes: event.appointment.notes || '',
-    };
 
-    try {
-      const blob = new Blob([JSON.stringify(appointmentData, null, 2)], { 
-        type: 'application/json' 
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `appointment-${event.appointment.id}-${format(new Date(event.appointment.startTime), "yyyy-MM-dd")}.json`;
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Error downloading appointment:', error);
-      // You might want to show a toast notification here
-    }
-  };
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';

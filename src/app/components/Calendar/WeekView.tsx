@@ -56,7 +56,7 @@ export function WeekView({
   };
 
   return (
-    <div className="w-full h-full bg-white" style={{ ['--gutter-w' as any]: '64px' }}>
+    <div className="w-full h-full bg-white" style={{ ['--gutter-w' as string]: '64px' }}>
       {/* Day headers */}
       <header
         className="
