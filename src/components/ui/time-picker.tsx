@@ -21,9 +21,23 @@ export function TimePicker({ date, setDate, className, minTime }: TimePickerProp
   const generateTimeOptions = () => {
     const options = [];
     
+    // Determine the base date for generating time options
+    let baseDate: Date;
+    if (minTime) {
+      // Use the date from minTime as the base date
+      baseDate = new Date(minTime.getFullYear(), minTime.getMonth(), minTime.getDate());
+    } else if (date) {
+      // Use the selected date as the base date
+      baseDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    } else {
+      // Fallback to today's date
+      baseDate = new Date();
+      baseDate.setHours(0, 0, 0, 0);
+    }
+    
     for (let hour = 0; hour < 24; hour++) {
       for (let minute = 0; minute < 60; minute += 15) { // 15-minute intervals
-        const time = new Date();
+        const time = new Date(baseDate);
         time.setHours(hour, minute, 0, 0);
         
         // Skip times before minTime

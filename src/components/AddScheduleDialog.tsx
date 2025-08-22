@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,6 +22,15 @@ export default function AddScheduleDialog({ open, onClose, onSave }: AddSchedule
   const [eventFrom, setEventFrom] = useState('');
   const [contactNo, setContactNo] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+
+  const now = useMemo(() => new Date(), []);
+
+  const minTime = useMemo(() => {
+    if (!date) return now;
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const selectedDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    return selectedDay.getTime() === today.getTime() ? now : selectedDay;
+  }, [date, now]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -71,7 +80,7 @@ export default function AddScheduleDialog({ open, onClose, onSave }: AddSchedule
             </div>
             <div className="flex-1">
               <label className="block mb-1 font-medium">Start Time</label>
-              <TimePicker date={startTime} setDate={setStartTime} />
+              <TimePicker date={startTime} setDate={setStartTime} minTime={minTime} />
             </div>
 
           </div>

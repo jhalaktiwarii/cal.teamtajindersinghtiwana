@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -49,6 +49,15 @@ interface AppointmentFormProps {
 
 export default function AppointmentForm({ initialDate, onClose }: AppointmentFormProps) {
   const [open, setOpen] = useState(true);
+
+  const now = useMemo(() => new Date(), []);
+
+  const minTime = useMemo(() => {
+    if (!initialDate) return now;
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const selectedDay = new Date(initialDate.getFullYear(), initialDate.getMonth(), initialDate.getDate());
+    return selectedDay.getTime() === today.getTime() ? now : selectedDay;
+  }, [initialDate, now]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -126,6 +135,7 @@ export default function AppointmentForm({ initialDate, onClose }: AppointmentFor
                         <TimePicker
                           date={field.value}
                           setDate={(date) => field.onChange(date)}
+                          minTime={minTime}
                         />
                       </FormControl>
                       <FormMessage />
