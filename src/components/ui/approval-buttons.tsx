@@ -1,5 +1,5 @@
 import React from "react";
-import { CheckCircle2, XCircle, Check, X, CheckCircle, XCircle as XCircleIcon } from "lucide-react";
+import { CheckCircle, XCircle as XCircleIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ApprovalButtonProps {
@@ -59,15 +59,7 @@ export function ApprovalButton({
     "disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
   );
 
-  const saffronClasses = cn(
-    baseClasses,
-    "bg-gradient-to-r from-orange-500 to-amber-500",
-    "border-orange-600 text-white shadow-lg",
-    "hover:from-orange-400 hover:to-amber-400", 
-    "hover:shadow-orange-500/25 hover:shadow-xl",
-    "focus:ring-orange-500",
-    "disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-  );
+
 
   const buttonClasses = isApprove ? approveClasses : declineClasses;
 

@@ -25,6 +25,7 @@ import { ShareDialog } from '../ShareDialog';
 import { CollapsibleSection } from '@/components/ui/collapsible-section';
 import { BirthdayList } from './BirthdayList';
 import type { Birthday } from '@/app/types/birthday';
+
 import { Calendar } from '@/components/ui/calendar';
 
 interface SidebarProps {
@@ -38,6 +39,7 @@ interface SidebarProps {
   onEditBirthday: (bday: Birthday) => void;
   onDeleteBirthday: (id: string) => void;
   onClose?: () => void;
+
 }
 
 type AppointmentStatus = 'all' | 'going' | 'not-going' | 'scheduled';
@@ -65,8 +67,6 @@ export function Sidebar({
   birthdays,
   onEditBirthday,
   onDeleteBirthday,
-  onClose,
-
 }: SidebarProps) {
   const { data: session } = useSession();
   const [searchQuery, setSearchQuery] = useState('');
@@ -397,7 +397,7 @@ export function Sidebar({
                 </DropdownMenuCheckboxItem>
               ))}
               <DropdownMenuSeparator />
-              <DropdownMenuItem >
+              <DropdownMenuItem onClick={handleExport}>
                 Export Selected
               </DropdownMenuItem>
             </DropdownMenuContent>

@@ -65,10 +65,10 @@ export function LoginForm() {
           router.refresh();
         }, 1000);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Dismiss loading toast and show error
       toast.dismiss(loadingToast);
-      const errorMessage = err?.message ?? "Unable to sign in. Please try again.";
+      const errorMessage = err instanceof Error ? err.message : "Unable to sign in. Please try again.";
       setError(errorMessage);
       toast.error("Login failed", {
         description: errorMessage

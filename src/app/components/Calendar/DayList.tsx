@@ -1,14 +1,14 @@
 import * as React from "react";
-import { formatISO, startOfDay, format } from "date-fns";
+import { format } from "date-fns";
 
 export function DayList({
   groups,
   activeISO,
   renderItem,
 }: {
-  groups: Array<{ dateISO: string; items: any[] }>;
+  groups: Array<{ dateISO: string; items: unknown[] }>;
   activeISO: string;
-  renderItem: (x: any) => React.ReactNode;
+  renderItem: (x: unknown) => React.ReactNode;
 }) {
   const refs = React.useRef<Record<string, HTMLElement | null>>({});
 

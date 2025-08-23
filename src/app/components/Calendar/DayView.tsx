@@ -6,27 +6,14 @@ interface DayViewProps {
   currentDate: Date;
   onEventClick: (event: CalendarEvent) => void;
   onDayDoubleClick: (date: Date, time?: string) => void;
-  onAddAppointment?: (date: Date, time?: string) => void;
+
 }
 
-export function DayView({ events, currentDate, onEventClick, onDayDoubleClick, onAddAppointment }: DayViewProps) {
+export function DayView({ events, currentDate, onEventClick, onDayDoubleClick }: DayViewProps) {
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const formatHour = (hour: number) => `${hour === 0 ? 12 : hour > 12 ? hour - 12 : hour} ${hour < 12 ? 'AM' : 'PM'}`;
 
-  const handleTimeSlotDoubleClick = (time: string) => {
-    const date = new Date(currentDate);
-    onDayDoubleClick(date, time);
-  };
 
-  const handleAddAppointment = (time: string, date: Date) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    date.setHours(0, 0, 0, 0);
-    if (date < today) {
-      return; // Prevent scheduling on past dates
-    }
-    onAddAppointment?.(date, time);
-  };
 
   const calculateEventPosition = (event: CalendarEvent) => {
     const startTime = new Date(event.appointment.startTime);

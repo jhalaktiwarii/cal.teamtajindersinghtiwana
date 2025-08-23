@@ -93,7 +93,7 @@ export function AuthLayout({
               <div className="mb-4">
                 <img 
                   src="/logo.png" 
-                  alt="Tagendra Singh Tiwana" 
+                  alt="Tajinder Singh Tiwana" 
                   className="h-20 w-20 rounded-full object-cover border-2 border-slate-200 shadow-lg"
                   onError={(e) => {
                     console.error('Logo failed to load:', e);

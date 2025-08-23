@@ -97,37 +97,55 @@ export async function findBirthdayByNameAndDate(fullName: string, day: number, m
   return result.Items && result.Items.length > 0 ? result.Items[0] as Birthday : null;
 }
 
-export async function createBirthday(birthday: Omit<Birthday, 'id'>): Promise<{ birthday: Birthday; wasReplaced: boolean }> {
+export async function createBirthday(birthday: Omit<Birthday, 'id'>, skipDuplicateCheck: boolean = false): Promise<{ birthday: Birthday; wasReplaced: boolean }> {
   await ensureBirthdaysTable();
   
-  // Check for existing birthday with same name and date
-  const existingBirthday = await findBirthdayByNameAndDate(
-    birthday.fullName, 
-    birthday.day, 
-    birthday.month, 
-    birthday.year
-  );
-  
-  if (existingBirthday) {
-    // Update existing birthday with new data (replace it)
-    const updatedBirthday: Birthday = {
-      ...existingBirthday,
-      ...birthday,
-      id: existingBirthday.id // Keep the same ID
-    };
+  try {
+    console.log('Creating birthday for:', birthday.fullName, 'Day:', birthday.day, 'Month:', birthday.month);
     
-    await dynamoDb.send(new PutCommand({ 
-      TableName: getTableName("BIRTHDAYS"), 
-      Item: updatedBirthday 
-    }));
+    if (skipDuplicateCheck) {
+      // Skip duplicate checking for bulk imports to avoid throttling
+      console.log('Skipping duplicate check for bulk import');
+      const id = `bday_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const newBirthday: Birthday = { id, ...birthday };
+      await dynamoDb.send(new PutCommand({ TableName: getTableName("BIRTHDAYS"), Item: newBirthday }));
+      return { birthday: newBirthday, wasReplaced: false };
+    }
     
-    return { birthday: updatedBirthday, wasReplaced: true };
-  } else {
-    // Create new birthday
-    const id = `bday_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const newBirthday: Birthday = { id, ...birthday };
-    await dynamoDb.send(new PutCommand({ TableName: getTableName("BIRTHDAYS"), Item: newBirthday }));
-    return { birthday: newBirthday, wasReplaced: false };
+    // Check for existing birthday with same name and date
+    const existingBirthday = await findBirthdayByNameAndDate(
+      birthday.fullName, 
+      birthday.day, 
+      birthday.month, 
+      birthday.year
+    );
+    
+    if (existingBirthday) {
+      console.log('Found existing birthday, updating:', existingBirthday.id);
+      // Update existing birthday with new data (replace it)
+      const updatedBirthday: Birthday = {
+        ...existingBirthday,
+        ...birthday,
+        id: existingBirthday.id // Keep the same ID
+      };
+      
+      await dynamoDb.send(new PutCommand({ 
+        TableName: getTableName("BIRTHDAYS"), 
+        Item: updatedBirthday 
+      }));
+      
+      return { birthday: updatedBirthday, wasReplaced: true };
+    } else {
+      console.log('Creating new birthday');
+      // Create new birthday
+      const id = `bday_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const newBirthday: Birthday = { id, ...birthday };
+      await dynamoDb.send(new PutCommand({ TableName: getTableName("BIRTHDAYS"), Item: newBirthday }));
+      return { birthday: newBirthday, wasReplaced: false };
+    }
+  } catch (error) {
+    console.error('Error in createBirthday:', error);
+    throw error;
   }
 }
 
