@@ -21,14 +21,18 @@ export function ContactOptionsModal({ open, onClose, phoneNumber, personName }: 
   };
 
   const handleWhatsApp = () => {
-    const message = encodeURIComponent("ताजिंदर सिंह तिवाना की ओर से आपको जन्मदिन की हार्दिक शुभकामनाएं");
+    const message = encodeURIComponent("आपको जन्मदिन की हार्दिक शुभकामनाएँ। भगवान से प्रार्थना है कि आपका जीवन स्वस्थ, सुखमय और उज्ज्वल भविष्य से परिपूर्ण हो।
+आपका जीवन खुशियों और सफलताओं से भरा रहे, यही मेरी मंगलकामना है।
+- तेजिंदर सिंह तिवाना");
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
     window.open(whatsappUrl, '_blank');
     onClose();
   };
 
   const handleSMS = () => {
-    const message = "ताजिंदर सिंह तिवाना की ओर से आपको जन्मदिन की हार्दिक शुभकामनाएं";
+    const message = "आपको जन्मदिन की हार्दिक शुभकामनाएँ। भगवान से प्रार्थना है कि आपका जीवन स्वस्थ, सुखमय और उज्ज्वल भविष्य से परिपूर्ण हो।
+आपका जीवन खुशियों और सफलताओं से भरा रहे, यही मेरी मंगलकामना है।
+- तेजिंदर सिंह तिवाना";
     const smsUrl = `sms:${phoneNumber}?body=${encodeURIComponent(message)}`;
     window.open(smsUrl, '_self');
     onClose();
