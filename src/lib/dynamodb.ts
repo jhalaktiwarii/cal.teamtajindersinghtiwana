@@ -6,7 +6,7 @@ const config: DynamoDBClientConfig = {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'dummy',
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'dummy',
   },
-  region: process.env.AWS_REGION || 'local'
+  region: process.env.AWS_REGION || 'us-east-1'
 };
 
 if (process.env.DYNAMODB_ENDPOINT) {
@@ -20,3 +20,10 @@ export const dynamoDb = DynamoDBDocumentClient.from(client, {
     removeUndefinedValues: true,
   },
 });
+
+// Add error handling for missing AWS configuration
+export const isAwsConfigured = () => {
+  return process.env.AWS_ACCESS_KEY_ID && 
+         process.env.AWS_SECRET_ACCESS_KEY && 
+         process.env.AWS_REGION;
+};

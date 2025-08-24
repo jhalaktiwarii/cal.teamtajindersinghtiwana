@@ -8,10 +8,18 @@ let tableInitialized = false;
 
 export async function ensureBirthdaysTable() {
   if (tableInitialized) return;
+  
+  // Check if AWS is properly configured
+  if (!process.env.AWS_REGION) {
+    console.warn("AWS_REGION not configured, skipping table initialization");
+    tableInitialized = true;
+    return;
+  }
+  
   const client = new DynamoDBClient({
     credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'dummy',
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'dummy',
     },
     region: process.env.AWS_REGION,
   });
@@ -45,7 +53,9 @@ export async function ensureBirthdaysTable() {
     tableInitialized = true;
   } catch (error) {
     console.error("Error ensuring birthdays table:", error);
-    throw error;
+    // Don't throw error, just log it and continue
+    console.warn("Continuing without table initialization");
+    tableInitialized = true;
   }
 }
 

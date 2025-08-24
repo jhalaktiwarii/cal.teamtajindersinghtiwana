@@ -1,9 +1,10 @@
 "use client"
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Gift, Edit2, Trash2, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Birthday } from '@/app/types/birthday';
+import { ContactOptionsModal } from './ContactOptionsModal';
 
 interface BirthdayGridProps {
   birthdays: Birthday[];
@@ -52,6 +53,8 @@ const formatBirthdayDate = (day: number, month: number): string => {
 };
 
 export function BirthdayGrid({ birthdays, onEdit, onDelete }: BirthdayGridProps) {
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<{ phone: string; name: string } | null>(null);
   
   // Filter out invalid birthdays and create a clean list
   const validBirthdays = birthdays.filter(bday => 
@@ -77,6 +80,11 @@ export function BirthdayGrid({ birthdays, onEdit, onDelete }: BirthdayGridProps)
     const nextB = getNextBirthday(b.day, b.month);
     return nextA.getTime() - nextB.getTime();
   });
+
+  const handleContactClick = (phone: string, name: string) => {
+    setSelectedContact({ phone, name });
+    setContactModalOpen(true);
+  };
 
   return (
     <div className="w-full">
@@ -151,9 +159,9 @@ export function BirthdayGrid({ birthdays, onEdit, onDelete }: BirthdayGridProps)
                   {bday.phone ? (
                     <div className="mb-2">
                       <button
-                        onClick={() => window.open(`tel:${bday.phone}`, '_self')}
+                        onClick={() => handleContactClick(bday.phone!, bday.fullName)}
                         className="text-sm text-gray-700 dark:text-gray-300 font-mono hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 underline decoration-dotted underline-offset-2"
-                        title={`Call ${bday.phone}`}
+                        title={`Contact ${bday.phone}`}
                       >
                         {bday.phone}
                       </button>
@@ -201,6 +209,19 @@ export function BirthdayGrid({ birthdays, onEdit, onDelete }: BirthdayGridProps)
           <Gift className="h-12 w-12 mx-auto mb-4 text-gray-300" />
           <p className="text-sm">No birthdays found</p>
         </div>
+      )}
+
+      {/* Contact Options Modal */}
+      {selectedContact && (
+        <ContactOptionsModal
+          open={contactModalOpen}
+          onClose={() => {
+            setContactModalOpen(false);
+            setSelectedContact(null);
+          }}
+          phoneNumber={selectedContact.phone}
+          personName={selectedContact.name}
+        />
       )}
     </div>
   );
